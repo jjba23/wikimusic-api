@@ -169,7 +169,6 @@ Find below a list ideas and work being done on this project by all our contribut
 ** Project backlog
 *** TODO Automated Cabal Hackage release in CI and version bumps
 *** TODO Recently viewed functionality
-*** TODO Favourites functionality
 *** TODO Add optional lyrics for song textfield
 *** TODO Clock and identifier generation as free monads, take things to a higher level
 *** TODO Create and optimize custom Prelude, and clean all files imports
