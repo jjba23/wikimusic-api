@@ -1,0 +1,7 @@
+
+ALTER TABLE songs ADD COLUMN description VARCHAR NULL;
+ALTER TABLE artists ADD COLUMN description VARCHAR NULL;
+ALTER TABLE genres ADD COLUMN description VARCHAR NULL;
+ALTER TABLE forum_pages ADD COLUMN description VARCHAR NULL;
+ALTER TABLE forum_categories ADD COLUMN description VARCHAR NULL;
+ALTER TABLE users ADD COLUMN description VARCHAR NULL;

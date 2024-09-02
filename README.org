@@ -1,0 +1,212 @@
+#+title: WikiMusic API
+#+options: toc:nil
+
+API and Persistence layer to PostgreSQL for WikiMusic, the invite-only private knowledge sharing of music community.
+
+/WikiMusic/
+
+#+begin_html
+<div>
+<img src="https://img.shields.io/badge/Haskell-5D4F85?logo=haskell&logoColor=fff&style=plastic" alt="Haskell"/>
+<img src="https://img.shields.io/badge/PostgreSQL-4169E1?logo=postgresql&logoColor=fff&style=plastic" alt="PostgreSQL"/>
+<img src="https://img.shields.io/badge/GNU%20Emacs-7F5AB6?logo=gnuemacs&logoColor=fff&style=plastic" alt="GNU Emacs"/>
+<img src="https://img.shields.io/badge/NixOS-5277C3?logo=nixos&logoColor=fff&style=plastic" alt="NixOS"/>
+<img src="https://img.shields.io/badge/Redis-DC382D?logo=redis&logoColor=fff&style=plastic" alt="Redis"/>
+</div>
+#+end_html
+
+
+WikiMusic as a software means an ingenious combination of a backend, a REST API, a database, and a user-interface to create a Content Management System (CMS) and a Gallery for music of all kinds, with educational intents.
+
+This is 100% free software, licensed under the GNU General Public License v3 or later.
+[[https://www.gnu.org/licenses/gpl-3.0.en.html][Refer to the full license, on GNU's website]]
+
+The WikiMusic project is an invite-only community, with the goal of knowledge sharing, and not for profit driven.
+
+[[https://www.buymeacoffee.com/jjbigorra][Please donate by clicking here]]. This helps us keep the underlying cloud infrastructure and Joe's work hours going strong.
+
+In this Git repository you will find the source code behind WikiMusic's backend.
+
+To see the living API spec of WikiMusic, also known as API definition, go to [[file:src/WikiMusic/Servant/ApiSpec.hs]]
+
+** Project structure
+
+~src/WikiMusic/~ harbours the Haskell code that makes the API work. Inside there you will find:
+- ~Console~ is a package with functionality related to logging to console / stdout.
+- ~Free~ is a package with free monadic definitions of the possible interactions with the WikiMusic system.
+- ~Interaction~ is a package with the implementation agnostic "business logic" of the WikiMusic system.
+- ~Model~ is a package with common data models to the entire system.
+- ~Persistence~ is a package with the Persistence implementation of several ~Command~ and ~Query~ interactions.
+- ~SMTP~ is a package that contains SMTP Mail related implementations.
+- ~Servant~ is a package that contains the API definition, routes and wiring of HTTP.
+- ~Boot.hs~ is the entry point to start this REST API.
+- ~Protolude.hs~ contains a custom tailor-made standard library (prelude) for WikiMusic, which helps developing.
+
+** Implementation details
+
+WikiMusic API is made using Haskell and free(er) monad techniques, along with great libraries made by the brilliant Haskell community. Some worthy mentions include servant, hasql, rio, free-alacarte, wai, keuringsdienst, optics.
+
+Using free(er) monads means that we can describe the business logic of certain layers at a very high abstraction level, and we are free to interpret this logic as we see fit, depending on the use case. This helps testing, decoupling, and maintaining code.
+
+** Installing and running
+
+This Haskell project requires certain C / C++ libraries to run. Pay attention the the error messages at build time and install dependencies accordingly.
+
+We recommend running WikiMusic API with the Nix package manager, and even better with NixOS, since this project has a close integrations for NixOS machines.
+
+Otherwise, on systems like Void Linux :
+#+begin_src
+sudo xbps-install zlib zlib-devel libpqxx-devel postgresql-libs postgresql-libs-devel ncurses-libtinfo-devel
+#+end_src
+
+You will also need a PostgreSQL database and a Redis instance (to rate limit certain requests) to be accessible from WikiMusic API and running.
+
+WikiMusic will take care of the database schema migrations for you.
+
+There are also example docker compose files ready to be used at the ~resources~ folder for your convenience.
+
+* User permission
+
+In WikiMusic we have users of several kinds, with different privileges. See the table below for an understanding on what you can/cannot do depending on your rank.
+
+Demo user:
+
+| Resource | Create | Read | Update | Delete | Comment | Like/Dislike |
+|----------+--------+------+--------+--------+---------+--------------|
+| Song     | ❌     | ✅   | ❌     | ❌     | ✅      | ✅           |
+| Artist   | ❌     | ✅   | ❌     | ❌     | ✅      | ✅           |
+| Genre    | ❌     | ✅   | ❌     | ❌     | ✅      | ✅           |
+| User     | ❌     | ❌   | ❌     | ❌     | N/A     | N/A          |
+
+Low-rank user:
+
+| Resource | Create | Read | Update | Delete | Comment | Like/Dislike |
+|----------+--------+------+--------+--------+---------+--------------|
+| Song     | ✅     | ✅   | ✅     | ❌     | ✅      | ✅           |
+| Artist   | ✅     | ✅   | ✅     | ❌     | ✅      | ✅           |
+| Genre    | ✅     | ✅   | ✅     | ❌     | ✅      | ✅           |
+| User     | ❌     | ❌   | ❌     | ❌     | N/A     | N/A          |
+
+Maintainer user:
+
+| Resource | Create | Read | Update | Delete | Comment | Like/Dislike |
+|----------+--------+------+--------+--------+---------+--------------|
+| Song     | ✅     | ✅   | ✅     | ✅     | ✅      | ✅           |
+| Artist   | ✅     | ✅   | ✅     | ✅     | ✅      | ✅           |
+| Genre    | ✅     | ✅   | ✅     | ✅     | ✅      | ✅           |
+| User     | ✅     | ✅   | ✅     | ❌     | N/A     | N/A          |
+
+Super-user: can do everyting to the system!
+
+* NixOS
+
+Enter a nice shell provided by flakes, by doing ~nix develop~. You can also do ~nix build~ to build the project with Nix.
+
+Run the API with for example: ~nix run . -- "./resources/config/run-local.toml"~ .
+
+
+** Bare metal
+
+It can be needed, if you want to run bare metal without direnv, to do things like this sometimes in the ~cabal.project~ (find by ~find /nix -name "zlib.h*"~):
+
+#+begin_src nix
+package postgresql-libpq
+    extra-include-dirs: /nix/store/ahb6l0carh3yc6a5d4zdxsxf69sdhnhh-postgresql-15.4/include
+
+package zlib
+    extra-include-dirs: /nix/store/686lhcz4bwg3wk09pi1xxjgzbxv7ys5q-zlib-1.3-dev/include
+    extra-lib-dirs: /nix/store/4rx3vkkd91wkbhpflsplfga603cp1l1c-zlib-1.3/lib
+#+end_src
+
+* API documentation
+
+When running WikiMusic API, you can navigate to ~<url where you serve it>/swagger.json~ to get the OpenAPI spec for WikiMusic.
+
+
+* Example config file
+
+For local runs you can take a look at [[file:resources/config/run-local.toml]].
+
+* Production environment diagram
+
+#+begin_src dot :file resources/images/production-env-diagram.png :exports results :mkdirp yes
+  digraph prodenv {
+  subgraph clusterA {
+  fontname="Inter,Helvetica,Arial,sans-serif"
+  node [ shape="box", fontname="Inter,Helvetica,Arial,sans-serif" ]
+  edge [ fontname="Inter,Helvetica,Arial,sans-serif", arrowhead="rnormal", arrowtail="dot" ]
+
+  I1 [ label="api.wikimusic.jointhefreeworld.org via HTTPS" ]
+  I2 [ label="AWS Cloudfront" ]
+  I3 [ label="AWS EC2 t3.small instance\nrunning NixOS" ]
+  I4 [ label="Haskell + Servant + PostgreSQL + Redis" ]
+  I5 [ label="GitLab CI/CD" ]
+  I6 [ label="AWS SQS queue" ]
+
+
+  I1 -> I2;
+  I2 -> I3;
+  I3 -> I4;
+  I5 -> I6;
+  I3 -> I6;
+
+  }
+  }
+#+end_src
+
+#+RESULTS:
+[[file:resources/images/production-env-diagram.png]]
+
+
+#+begin_src restclient
+  GET https://api.wikimusic.jointhefreeworld.org/songs?limit=1
+  X-WikiMusic-Auth: ab92eaef-83b2-483b-8ebe-be4cf7bf2c18
+#+end_src
+
+#+RESULTS:
+#+BEGIN_SRC js
+{
+  "songs": {
+    "73e032df-e926-4d14-837c-e6811138ce68": {
+      "albumInfoLink": null,
+      "albumName": null,
+      "approvedBy": null,
+      "artists": {},
+      "artworks": {},
+      "comments": [],
+      "contents": {},
+      "createdAt": "2024-08-14T16:19:37.664874Z",
+      "createdBy": "cab727b8-37fb-46c0-947a-44a2b576bf9c",
+      "description": "Blood Fire Death is the fourth studio album by Swedish extreme metal band Bathory. It was released on 8 October 1988, through Music for Nations sublabel, Under One Flag. The album, although mostly black metal, includes some of the first examples of Viking metal.[1] According to the book Black Metal: Evolution of the Cult by Dayal Patterson, Blood Fire Death began a second trilogy, an era Quorthon described as the \"pre-Christian Swedish Viking Era\".",
+      "displayName": "A Fine Day To Die",
+      "identifier": "73e032df-e926-4d14-837c-e6811138ce68",
+      "lastEditedAt": "2024-08-15T10:21:57.375783Z",
+      "musicCreationDate": null,
+      "musicKey": null,
+      "musicTuning": null,
+      "opinions": {},
+      "soundcloudUrl": null,
+      "spotifyUrl": null,
+      "viewCount": 30,
+      "visibilityStatus": 0,
+      "wikipediaUrl": "https://en.wikipedia.org/wiki/Bathory_(band)",
+      "youtubeUrl": null
+    }
+  },
+  "sortOrder": [
+    "73e032df-e926-4d14-837c-e6811138ce68"
+  ]
+}
+// GET https://api.wikimusic.jointhefreeworld.org/songs?limit=1
+// HTTP/1.1 200 OK
+// Content-Type: application/json;charset=utf-8
+// Transfer-Encoding: chunked
+// Connection: keep-alive
+// Date: Wed, 21 Aug 2024 12:04:56 GMT
+// Server: Warp/3.3.31
+// X-Cache: Miss from cloudfront
+// Via: 1.1 645f72cdd7b73d139609aec0ade6f5f8.cloudfront.net (CloudFront)
+// X-Amz-Cf-Pop: AMS58-P1
+// X-Amz-Cf-Id: 7AHpurUaanQYEwJuTrreucEX0lwV-Gsf692Cgn_cGWunRuRnrGpr9Q==
+// Request duration: 0.045151s
+#+END_SRC

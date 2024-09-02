@@ -1,0 +1,41 @@
+[servant]
+port = 50050
+host = "127.0.0.1"
+
+[postgresql]
+user = "wikimusic_admin"
+password-file = "/run/secrets/wikimusic_postgres_key"
+port = 55432
+name = "wikimusic_database"
+pool-size = 30
+host = "localhost"
+run-migrations = true
+
+[redis]
+port = 63379
+password-file = "/run/secrets/wikimusic_redis_key"
+
+[cors]
+origins = [
+  "https://wikimusic.jointhefreeworld.org",
+  "https://www.wikimusic.jointhefreeworld.org",
+  "https://beta.wikimusic.jointhefreeworld.org",
+  "https://www.beta.wikimusic.jointhefreeworld.org",
+  "http://127.0.0.1:5173"
+]
+methods = [ "OPTIONS", "POST", "PUT", "DELETE", "PATCH", "GET" ]
+request-headers = [ "authorization", "content-type", "credentials", "x-wikimusic-auth", "access-control-allow-origin" ]
+
+[mail]
+send-timeout-seconds = 10
+host = "email-smtp.eu-west-3.amazonaws.com"
+user = "AKIA4DBMA2YMGZ3RGWX5"
+password-file = "/run/secrets/wikimusic_email_key"
+sender-name = "No-Reply - WikiMusic Bot"
+sender-mail = "noreply@jointhefreeworld.org"
+
+[web-frontend]
+base-url = "https://wikimusic.jointhefreeworld.org"
+
+[dev]
+reported-version = "production"

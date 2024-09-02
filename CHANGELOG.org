@@ -1,0 +1,12 @@
+* Changelog for `wikimusic-api`
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to the
+[Haskell Package Versioning Policy](https://pvp.haskell.org/).
+
+** Releases
+*** v0.3.0.0
+- Using ~Hasql.Pool~ package across the entire system when doing database queries.
+- Implemented the typeclasses for ~Command~ and ~Query~ for the entities ~Artist~ and ~Song~. This means that the Handlers have become lean as f*ck and we have 100% loose coupling between the persistence layer and the domain and handler layers. In principle this is actually a typeclass dependency injection, very elegant.
