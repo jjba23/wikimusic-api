@@ -158,55 +158,24 @@ For local runs you can take a look at [[file:resources/config/run-local.toml]].
 [[file:resources/images/production-env-diagram.png]]
 
 
-#+begin_src restclient
-  GET https://api.wikimusic.jointhefreeworld.org/songs?limit=1
-  X-WikiMusic-Auth: ab92eaef-83b2-483b-8ebe-be4cf7bf2c18
-#+end_src
+* Project management
 
-#+RESULTS:
-#+BEGIN_SRC js
-{
-  "songs": {
-    "73e032df-e926-4d14-837c-e6811138ce68": {
-      "albumInfoLink": null,
-      "albumName": null,
-      "approvedBy": null,
-      "artists": {},
-      "artworks": {},
-      "comments": [],
-      "contents": {},
-      "createdAt": "2024-08-14T16:19:37.664874Z",
-      "createdBy": "cab727b8-37fb-46c0-947a-44a2b576bf9c",
-      "description": "Blood Fire Death is the fourth studio album by Swedish extreme metal band Bathory. It was released on 8 October 1988, through Music for Nations sublabel, Under One Flag. The album, although mostly black metal, includes some of the first examples of Viking metal.[1] According to the book Black Metal: Evolution of the Cult by Dayal Patterson, Blood Fire Death began a second trilogy, an era Quorthon described as the \"pre-Christian Swedish Viking Era\".",
-      "displayName": "A Fine Day To Die",
-      "identifier": "73e032df-e926-4d14-837c-e6811138ce68",
-      "lastEditedAt": "2024-08-15T10:21:57.375783Z",
-      "musicCreationDate": null,
-      "musicKey": null,
-      "musicTuning": null,
-      "opinions": {},
-      "soundcloudUrl": null,
-      "spotifyUrl": null,
-      "viewCount": 30,
-      "visibilityStatus": 0,
-      "wikipediaUrl": "https://en.wikipedia.org/wiki/Bathory_(band)",
-      "youtubeUrl": null
-    }
-  },
-  "sortOrder": [
-    "73e032df-e926-4d14-837c-e6811138ce68"
-  ]
-}
-// GET https://api.wikimusic.jointhefreeworld.org/songs?limit=1
-// HTTP/1.1 200 OK
-// Content-Type: application/json;charset=utf-8
-// Transfer-Encoding: chunked
-// Connection: keep-alive
-// Date: Wed, 21 Aug 2024 12:04:56 GMT
-// Server: Warp/3.3.31
-// X-Cache: Miss from cloudfront
-// Via: 1.1 645f72cdd7b73d139609aec0ade6f5f8.cloudfront.net (CloudFront)
-// X-Amz-Cf-Pop: AMS58-P1
-// X-Amz-Cf-Id: 7AHpurUaanQYEwJuTrreucEX0lwV-Gsf692Cgn_cGWunRuRnrGpr9Q==
-// Request duration: 0.045151s
-#+END_SRC
+
+*** TODO Recently viewed functionality
+*** TODO Favourites functionality
+*** TODO Add optional lyrics for song textfield
+*** TODO Clock and identifier generation as free monads, take things to a higher level
+*** TODO Create and optimize custom Prelude, and clean all files imports
+*** TODO Improve reusability in ~fromString . T.unpack $ x~
+*** TODO Liked items list view (liked songs, liked genres)
+*** TODO Finish cleaning persistence layer by using only Beam for all queries (and no Hasql)
+*** TODO Create "for profit" version (premium offline pre-rendered) of WikiMusic, as app, embedded SQLite
+*** TODO Ensure all data models are validated in requests
+*** TODO Use more non-empty types and sets if possible
+*** TODO Remove unused dependencies
+*** TODO Create black box tests for basic system functioning (with PostgreSQL + Redis containers)
+*** TODO Genre <> Song <> Artist relation
+*** TODO Drop SQL tables of user favourites, since opinions table will be used for it
+*** TODO Add forums 
+*** TODO Validate and limit size and type of files being uploaded
+**** TODO GP5 support (song file upload)
