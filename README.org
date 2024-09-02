@@ -1,5 +1,4 @@
 #+title: WikiMusic API
-#+options: toc:nil
 
 API and Persistence layer to PostgreSQL for WikiMusic, the invite-only private knowledge sharing of music community.
 
