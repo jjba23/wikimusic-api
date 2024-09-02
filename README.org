@@ -160,7 +160,14 @@ For local runs you can take a look at [[file:resources/config/run-local.toml]].
 
 * Project management
 
+Find below a list ideas and work being done on this project by all our contributors.
 
+** Work in progress
+*** WIP Migration to GitHub
+
+
+** Project backlog
+*** TODO Automated Cabal Hackage release in CI and version bumps
 *** TODO Recently viewed functionality
 *** TODO Favourites functionality
 *** TODO Add optional lyrics for song textfield
