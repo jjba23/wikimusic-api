@@ -10,7 +10,6 @@ module WikiMusic.Model.Config
     RedisConfig (..),
     ServantConfig (..),
     CorsConfig (..),
-    -- CookieConfig (..),
     MailConfig (..),
     WebFrontendConfig (..),
     appConfigCodec,
@@ -101,30 +100,11 @@ corsConfigCodec =
     <*> Toml.arrayOf Toml._Text "request-headers"
     .= (^. #requestHeaders)
 
--- data CookieConfig = CookieConfig
---   { maxAge :: Int,
---     path :: Text,
---     domain :: Text,
---     sessionCookieName :: Text,
---     secure :: Text,
---     sameSite :: Text
---   }
---   deriving (Generic, Eq, Show)
-
--- cookieConfigCodec :: TomlCodec CookieConfig
--- cookieConfigCodec =
---   CookieConfig
---     <$> Toml.int "max-age" .= (^. #maxAge)
---     <*> Toml.text "path" .= (^. #path)
---     <*> Toml.text "domain" .= (^. #domain)
---     <*> Toml.text "session-cookie-name" .= (^. #sessionCookieName)
---     <*> Toml.text "secure" .= (^. #secure)
---     <*> Toml.text "same-site" .= (^. #sameSite)
-
 data MailConfig = MailConfig
   { sendTimeoutSeconds :: Int,
     host :: Text,
-    user :: Text,
+    userFile :: Text,
+    user :: Maybe Text,
     passwordFile :: Text,
     password :: Maybe Text,
     senderName :: Text,
@@ -139,7 +119,9 @@ mailConfigCodec =
     .= (^. #sendTimeoutSeconds)
     <*> Toml.text "host"
     .= (^. #host)
-    <*> Toml.text "user"
+    <*> Toml.text "user-file"
+    .= (^. #userFile)
+    <*> Toml.dioptional (Toml.text "user")
     .= (^. #user)
     <*> Toml.text "password-file"
     .= (^. #passwordFile)
@@ -174,7 +156,6 @@ data AppConfig = AppConfig
     postgresql :: PostgreSQLConfig,
     redis :: RedisConfig,
     cors :: CorsConfig,
-    -- cookie :: CookieConfig,
     mail :: MailConfig,
     webFrontend :: WebFrontendConfig,
     dev :: DevConfig
@@ -192,7 +173,6 @@ appConfigCodec =
     .= (^. #redis)
     <*> Toml.table corsConfigCodec "cors"
     .= (^. #cors)
-    -- <*> Toml.table cookieConfigCodec "cookie" .= (^. #cookie)
     <*> Toml.table mailConfigCodec "mail"
     .= (^. #mail)
     <*> Toml.table webFrontendConfigCodec "web-frontend"
@@ -205,8 +185,6 @@ makeFieldLabelsNoPrefix ''PostgreSQLConfig
 makeFieldLabelsNoPrefix ''RedisConfig
 makeFieldLabelsNoPrefix ''ServantConfig
 makeFieldLabelsNoPrefix ''CorsConfig
-
--- makeFieldLabelsNoPrefix ''CookieConfig
 makeFieldLabelsNoPrefix ''MailConfig
 makeFieldLabelsNoPrefix ''WebFrontendConfig
 makeFieldLabelsNoPrefix ''DevConfig

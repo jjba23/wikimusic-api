@@ -42,6 +42,6 @@ mailSend env req = do
     doSendMail =
       sendMailWithLoginSTARTTLS
         (T.unpack $ mailCfg ^. #host)
-        (T.unpack $ mailCfg ^. #user)
-        (maybe "" T.unpack (mailCfg ^. #password))
+        (maybe "" T.unpack $ mailCfg ^. #user)
+        (maybe "" T.unpack $ mailCfg ^. #password)
         preparedMail

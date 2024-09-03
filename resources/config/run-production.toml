@@ -29,8 +29,8 @@ request-headers = [ "authorization", "content-type", "credentials", "x-wikimusic
 [mail]
 send-timeout-seconds = 10
 host = "email-smtp.eu-west-3.amazonaws.com"
-user = "AKIA4DBMA2YMGZ3RGWX5"
-password-file = "/run/secrets/wikimusic_email_key"
+user-file = "/run/secrets/amazon_ses_user"
+password-file = "/run/secrets/amazon_ses_password"
 sender-name = "No-Reply - WikiMusic Bot"
 sender-mail = "noreply@jointhefreeworld.org"
 
