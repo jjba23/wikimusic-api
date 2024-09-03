@@ -188,3 +188,4 @@ Find below a list ideas and work being done on this project by all our contribut
 *** TODO Prometheus metrics and visualizations, use Grafana in Docker, also in production server
 *** TODO wikimusic marketing emails, asking for donation, recommending last added and last edited top 10 items 
 *** TODO consider to migrate to SQlite and in memory rate limiting ease testing too
+*** TODO fix email, do not expose SMTP credentials on GitHub
