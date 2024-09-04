@@ -178,7 +178,8 @@ Find below a list ideas and work being done on this project by all our contribut
 *** TODO Ensure all data models are validated in requests
 *** TODO Use more non-empty types and sets if possible
 *** TODO Remove unused dependencies
-*** TODO Create black box tests for basic system functioning (with PostgreSQL + Redis containers)
+*** TODO Create black box tests for basic system functioning (with PostgreSQL container)
+****  Create PostgreSQL assertion DSL for tests with Beam (check row exists)
 *** TODO Genre <> Song <> Artist relation
 *** TODO Drop SQL tables of user favourites, since opinions table will be used for it
 *** TODO Add forums 
@@ -187,5 +188,8 @@ Find below a list ideas and work being done on this project by all our contribut
 *** TODO extract mail monad, service, templates and views into its own microservices, communicate via grpc if possible, otherwise REST and ensure retries and good logging
 *** TODO Prometheus metrics and visualizations, use Grafana in Docker, also in production server
 *** TODO wikimusic marketing emails, asking for donation, recommending last added and last edited top 10 items 
-*** TODO consider to migrate to SQlite and in memory rate limiting ease testing too
-*** TODO fix email, do not expose SMTP credentials on GitHub
+*** TODO  in memory rate limiting (per node), remove Redis
+
+** Done
+*** DONE fix email, do not expose SMTP credentials on GitHub
+CLOSED: [2024-09-04 wo 17:23]
