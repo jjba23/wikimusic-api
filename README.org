@@ -153,7 +153,7 @@ For local runs you can take a look at [[file:resources/config/run-local.toml]].
   }
 #+end_src
 
-#+RESULTS:
+/#+RESULTS:
 [[file:resources/images/production-env-diagram.png]]
 
 
@@ -174,7 +174,7 @@ Find below a list ideas and work being done on this project by all our contribut
 *** TODO Improve reusability in ~fromString . T.unpack $ x~
 *** TODO Liked items list view (liked songs, liked genres)
 *** TODO Finish cleaning persistence layer by using only Beam for all queries (and no Hasql)
-*** TODO Create "for profit" version (premium offline pre-rendered) of WikiMusic, as app, embedded SQLite
+*** TODO Create "for profit" version (premium offline pre-rendered) of WikiMusic, as app (read-only)
 *** TODO Ensure all data models are validated in requests
 *** TODO Use more non-empty types and sets if possible
 *** TODO Remove unused dependencies
