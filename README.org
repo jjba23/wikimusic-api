@@ -153,7 +153,7 @@ For local runs you can take a look at [[file:resources/config/run-local.toml]].
   }
 #+end_src
 
-/#+RESULTS:
+#+RESULTS:
 [[file:resources/images/production-env-diagram.png]]
 
 
