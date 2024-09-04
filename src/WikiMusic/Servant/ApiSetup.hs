@@ -25,9 +25,6 @@ import Network.Wai
 import Network.Wai.Logger (ApacheLogger)
 import Network.Wai.Middleware.Cors
 import Network.Wai.Middleware.RequestLogger
-import Network.Wai.RateLimit
-import Network.Wai.RateLimit.Redis
-import Network.Wai.RateLimit.Strategy
 import Relude
 import Servant
 import Servant.OpenApi
@@ -113,7 +110,6 @@ mkApp logger' cfg pool redisConn = do
   pure
     . (if (cfg ^. #dev % #reportedVersion) == "dev" then logStdoutDev else logStdout)
     . myCors (cfg ^. #cors)
-    . rateLimitingMiddleware redisConn
     $ serveWithContext apiProxy apiCfg apiItself
 
 wiredUpPrivateServer :: Env -> Server PrivateAPI
@@ -200,14 +196,3 @@ wiredUpPublicServer env =
              :<|> doPasswordResetRoute env
          )
     :<|> systemInformationRoute env
-
-rateLimitingMiddleware :: Redis.Connection -> Middleware
-rateLimitingMiddleware conn = rateLimiting strategy {strategyOnRequest = customController}
-  where
-    backend = redisBackend conn
-    getKey = pure . C8.pack . Relude.show . remoteHost
-    strategy = slidingWindow backend 30 15 getKey
-    customController req =
-      if rawPathInfo req == "/login"
-        then strategyOnRequest strategy req
-        else pure True

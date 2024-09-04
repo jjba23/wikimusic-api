@@ -153,7 +153,6 @@ library
     , time
     , servant
     , servant-openapi3
-    , servant-rate-limit
     , servant-server
     , text
     , containers
@@ -164,10 +163,8 @@ library
     , wai
     , wai-cors
     , wai-extra
-    , wai-rate-limit
-    , wai-rate-limit-redis
     , wai-logger
-    , warp <= 3.3.31
+    , warp
     , smtp-mail
     , mime-mail
     , base64-bytestring
