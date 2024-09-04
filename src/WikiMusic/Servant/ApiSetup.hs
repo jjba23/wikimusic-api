@@ -20,7 +20,6 @@ import Data.Text qualified as T
 import Database.Beam
 import Database.Beam.Postgres
 import Database.Redis qualified as Redis
-import Hasql.Pool qualified
 import Network.Wai
 import Network.Wai.Logger (ApacheLogger)
 import Network.Wai.Middleware.Cors
@@ -74,7 +73,7 @@ myCors cfg = cors (const $ Just policy)
           corsIgnoreFailures = False
         }
 
-mkApp :: ApacheLogger -> AppConfig -> Hasql.Pool.Pool -> Redis.Connection -> IO Application
+mkApp :: ApacheLogger -> AppConfig -> IO Application
 mkApp logger' cfg pool redisConn = do
   now <- getCurrentTime
   conn <-

@@ -6,13 +6,12 @@
 {-# OPTIONS_GHC -fno-warn-ambiguous-fields #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
-module WikiMusic.Persistence.ArtistCommand () where
+module WikiMusic.PostgreSQL.ArtistCommand () where
 
 import Data.Map qualified as Map
 import Data.Text (pack)
 import Database.Beam
 import Database.Beam.Postgres
-import Hasql.Pool qualified
 import Relude
 import WikiMusic.Beam.Artist
 import WikiMusic.Beam.Database
@@ -22,7 +21,7 @@ import WikiMusic.Model.Artist
 import WikiMusic.Model.Artwork
 import WikiMusic.Model.Comment
 import WikiMusic.Model.Opinion
-import WikiMusic.Persistence.WriteAbstraction
+import WikiMusic.PostgreSQL.WriteAbstraction
 import WikiMusic.Protolude
 
 insertArtists' :: (MonadIO m) => Env -> [Artist] -> m ()
@@ -347,5 +346,3 @@ instance Exec ArtistCommand where
   execAlgebra (NewArtistArtworkFromRequest createdBy req next) =
     next =<< newArtistArtworkFromRequest' createdBy req
 
-fromHasqlUsageError :: Hasql.Pool.UsageError -> ArtistCommandError
-fromHasqlUsageError = PersistenceError . pack . Relude.show

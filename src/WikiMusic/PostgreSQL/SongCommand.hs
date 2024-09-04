@@ -9,7 +9,7 @@
 {-# OPTIONS_GHC -fno-warn-ambiguous-fields #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
-module WikiMusic.Persistence.SongCommand () where
+module WikiMusic.PostgreSQL.SongCommand () where
 
 import Data.Map qualified as Map
 import Data.Text (pack)
@@ -29,8 +29,8 @@ import WikiMusic.Model.Artwork
 import WikiMusic.Model.Comment
 import WikiMusic.Model.Opinion
 import WikiMusic.Model.Song
-import WikiMusic.Persistence.ReadAbstraction
-import WikiMusic.Persistence.WriteAbstraction
+import WikiMusic.PostgreSQL.ReadAbstraction
+import WikiMusic.PostgreSQL.WriteAbstraction
 import WikiMusic.Protolude
 import Prelude qualified
 
@@ -514,5 +514,3 @@ instance Exec SongCommand where
     stmtResult <- deleteStuffByUUID (env ^. #pool) "song_contents" "identifier" identifiers
     next $ first fromHasqlUsageError stmtResult
 
-fromHasqlUsageError :: Hasql.Pool.UsageError -> SongCommandError
-fromHasqlUsageError = PersistenceError . pack . Relude.show

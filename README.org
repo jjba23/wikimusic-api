@@ -43,7 +43,7 @@ To see the living API spec of WikiMusic, also known as API definition, go to [[f
 
 ** Implementation details
 
-WikiMusic API is made using Haskell and free(er) monad techniques, along with great libraries made by the brilliant Haskell community. Some worthy mentions include servant, hasql, rio, free-alacarte, wai, keuringsdienst, optics.
+WikiMusic API is made using Haskell and free(er) monad techniques, along with great libraries made by the brilliant Haskell community. Some worthy mentions include servant, free-alacarte, wai, keuringsdienst, optics.
 
 Using free(er) monads means that we can describe the business logic of certain layers at a very high abstraction level, and we are free to interpret this logic as we see fit, depending on the use case. This helps testing, decoupling, and maintaining code.
 
@@ -162,7 +162,7 @@ For local runs you can take a look at [[file:resources/config/run-local.toml]].
 Find below a list ideas and work being done on this project by all our contributors.
 
 ** Work in progress
-*** WIP Migration to GitHub
+*** WIP Finish cleaning persistence layer by using only Beam for all queries (and no Hasql)
 
 
 ** Project backlog
@@ -173,7 +173,7 @@ Find below a list ideas and work being done on this project by all our contribut
 *** TODO Create and optimize custom Prelude, and clean all files imports
 *** TODO Improve reusability in ~fromString . T.unpack $ x~
 *** TODO Liked items list view (liked songs, liked genres)
-*** TODO Finish cleaning persistence layer by using only Beam for all queries (and no Hasql)
+
 *** TODO Create "for profit" version (premium offline pre-rendered) of WikiMusic, as app (read-only)
 *** TODO Ensure all data models are validated in requests
 *** TODO Use more non-empty types and sets if possible
@@ -191,5 +191,7 @@ Find below a list ideas and work being done on this project by all our contribut
 
 
 ** Done
+*** DONE Migration to GitHub
+CLOSED: [2024-09-04 wo 22:05]
 *** DONE fix email, do not expose SMTP credentials on GitHub
 CLOSED: [2024-09-04 wo 17:23]

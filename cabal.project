@@ -1,26 +1,26 @@
 source-repository-package
   type: git
-  location: https://gitlab.com/jjba-projects/free-alacarte.git
-  tag: 59ff57411741e53a3ee6afee3fb3d0dee1e3e2e8
-  --sha256: e2usk70paDhrTTCkRDG7SwIRmcWYJmKrG0ePcaYCMxY=
+  location: https://github.com/jjba23/free-alacarte.git
+  tag: 737d5a65efac684eea964946a6ff14f39fedf931
+  --sha256: g6nekygjMaJcYWQslIOWgi04mWP1gxw+d+VEqzMvB7o=
 
 source-repository-package
   type: git
-  location: https://gitlab.com/jjba-projects/keuringsdienst.git
-  tag: cf905a034a009b8201ccd31eefee70a75f789940
-  --sha256: 4X26SkLLNWGvII43OD6uZhR5Xn4Umifhs7MvzywiAnY=
+  location: https://github.com/jjba23/keuringsdienst.git
+  tag: 8d4bda24ca7f30d65d2ee930f1798afa0ade3c59
+  --sha256: 1LESoe/LxATAMRJncsVMxJuHGqf0Eo/9jdNijRcNxHo=
 
 source-repository-package
   type: git
-  location: https://gitlab.com/jjba-projects/wikimusic-api-spec.git
-  tag: 6de75c094e3783760cdd2aca8d21474cdf03af3f
+  location: https://github.com/jjba23/wikimusic-api-spec.git
+  tag: fe541e94f1d00c1f193d359d677a839fe331b7fa
   --sha256: iqFHJJm1ONw5CafY17UhEfu/JvOxh3NfIjW5JV0F8S8=
   
 
 source-repository-package
   type: git
-  location: https://gitlab.com/jjba-projects/wikimusic-model-hs.git
-  tag: e82afaa7dddf1b8e836594ec731fe0966bb0cfa4
+  location: https://github.com/jjba23/wikimusic-model-hs.git
+  tag: c5c99228c12cb4618410cf5226a8a7efeab1dcca
   --sha256: 14d7WTTuOq8woG23XyumruJj3/uucK1DEyo51gollCU=
 
 packages: .

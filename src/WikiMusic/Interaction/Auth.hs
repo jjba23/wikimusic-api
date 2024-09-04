@@ -10,7 +10,7 @@ where
 
 import WikiMusic.Free.AuthQuery
 import WikiMusic.Interaction.Model.Auth
-import WikiMusic.Persistence.AuthQuery ()
+import WikiMusic.PostgreSQL.AuthQuery ()
 import WikiMusic.Protolude
 
 fetchMeAction :: (AuthQuery :<: f) => Env -> UUID -> Free f (Maybe GetMeQueryResponse)

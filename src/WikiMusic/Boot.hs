@@ -13,16 +13,13 @@ import Data.Text (pack, unpack)
 import Database.Beam
 import Database.Beam.Postgres
 import Database.Redis qualified as Redis
-import Hasql.Connection qualified
-import Hasql.Pool qualified
-import Hasql.Session qualified
 import Network.Wai.Handler.Warp
 import Network.Wai.Logger (ApacheLogger, withStdoutLogger)
 import Optics
 import Relude
 import WikiMusic.Config
 import WikiMusic.Model.Config
-import WikiMusic.Persistence.Migration
+import WikiMusic.PostgreSQL.Migration
 import WikiMusic.Servant.ApiSetup
 
 boot :: (MonadIO m) => m ()

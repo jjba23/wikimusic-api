@@ -32,8 +32,8 @@ import WikiMusic.Interaction.Model.Song
 import WikiMusic.Interaction.Song
 import WikiMusic.Model.Env
 import WikiMusic.Model.Other
-import WikiMusic.Persistence.SongCommand ()
-import WikiMusic.Persistence.SongQuery ()
+import WikiMusic.PostgreSQL.SongCommand ()
+import WikiMusic.PostgreSQL.SongQuery ()
 import WikiMusic.Protolude
 import WikiMusic.Servant.Utilities
 

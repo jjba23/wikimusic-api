@@ -3,7 +3,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE NoFieldSelectors #-}
 
-module WikiMusic.Persistence.Migration
+module WikiMusic.PostgreSQL.Migration
   ( runWikiMusicMigrations,
   )
 where

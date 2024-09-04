@@ -9,7 +9,7 @@
 {-# OPTIONS_GHC -fno-warn-missing-signatures #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
-module WikiMusic.Persistence.ArtistQuery () where
+module WikiMusic.PostgreSQL.ArtistQuery () where
 
 import Data.Map (elems, keys)
 import Data.Map qualified as Map

@@ -6,7 +6,7 @@
 {-# OPTIONS_GHC -fno-warn-ambiguous-fields #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
-module WikiMusic.Persistence.GenreCommand () where
+module WikiMusic.PostgreSQL.GenreCommand () where
 
 import Data.Map qualified as Map
 import Data.Text (pack)
@@ -22,7 +22,7 @@ import WikiMusic.Model.Artwork
 import WikiMusic.Model.Comment
 import WikiMusic.Model.Genre
 import WikiMusic.Model.Opinion
-import WikiMusic.Persistence.WriteAbstraction
+import WikiMusic.PostgreSQL.WriteAbstraction
 import WikiMusic.Protolude
 
 insertGenres' :: (MonadIO m) => Env -> [Genre] -> m (Map UUID Genre)
@@ -360,5 +360,3 @@ instance Exec GenreCommand where
   execAlgebra (NewGenreArtworkFromRequest createdBy req next) =
     next =<< newGenreArtworkFromRequest' createdBy req
 
-fromHasqlUsageError :: Hasql.Pool.UsageError -> GenreCommandError
-fromHasqlUsageError = PersistenceError . pack . Relude.show

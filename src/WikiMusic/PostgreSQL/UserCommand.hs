@@ -11,7 +11,7 @@
 {-# OPTIONS_GHC -fno-warn-ambiguous-fields #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
-module WikiMusic.Persistence.UserCommand () where
+module WikiMusic.PostgreSQL.UserCommand () where
 
 import Data.ByteString.Base64 qualified
 import Data.Password.Bcrypt
@@ -29,8 +29,8 @@ import WikiMusic.Beam.User
 import WikiMusic.Free.UserCommand
 import WikiMusic.Model.Auth
 import WikiMusic.Model.Env
-import WikiMusic.Persistence.ReadAbstraction
-import WikiMusic.Persistence.WriteAbstraction
+import WikiMusic.PostgreSQL.ReadAbstraction
+import WikiMusic.PostgreSQL.WriteAbstraction
 import WikiMusic.Protolude
 
 instance Exec UserCommand where

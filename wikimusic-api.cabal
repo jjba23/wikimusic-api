@@ -13,7 +13,6 @@ build-type:     Simple
                 
 extra-source-files:
     README.org
-    CHANGELOG.org
 
 source-repository head
   type: git
@@ -69,25 +68,17 @@ library
       WikiMusic.Beam.Relations
       
       -- λ postgresql implementations
-      WikiMusic.Persistence.ArtistCommand
-      WikiMusic.Persistence.ArtistQuery
-      WikiMusic.Persistence.AuthQuery
-      WikiMusic.Persistence.GenreCommand
-      WikiMusic.Persistence.GenreQuery
-      WikiMusic.Persistence.Migration
-      WikiMusic.Persistence.WriteAbstraction
-      WikiMusic.Persistence.ReadAbstraction
-      WikiMusic.Persistence.SongCommand
-      WikiMusic.Persistence.SongQuery
-      WikiMusic.Persistence.UserQuery
-      WikiMusic.Persistence.UserCommand
+      WikiMusic.PostgreSQL.ArtistCommand
+      WikiMusic.PostgreSQL.ArtistQuery
+      WikiMusic.PostgreSQL.AuthQuery
+      WikiMusic.PostgreSQL.GenreCommand
+      WikiMusic.PostgreSQL.GenreQuery
+      WikiMusic.PostgreSQL.Migration
+      WikiMusic.PostgreSQL.SongCommand
+      WikiMusic.PostgreSQL.SongQuery
+      WikiMusic.PostgreSQL.UserQuery
+      WikiMusic.PostgreSQL.UserCommand
       
-      -- λ postgresql data models            
-      WikiMusic.Persistence.Model.Artist
-      WikiMusic.Persistence.Model.Genre
-      WikiMusic.Persistence.Model.Other
-      WikiMusic.Persistence.Model.Song
-
       -- λ clock
       WikiMusic.Clock.LiveClock
 
@@ -133,14 +124,6 @@ library
     , base < 5
     , bytestring
     , contravariant-extras
-    , postgresql-libpq
-    , hasql
-    , hasql-implicits
-    , hasql-migration
-    , hasql-optparse-applicative
-    , hasql-pool == 0.10.1
-    , hasql-transaction
-    , hedis
     , keuringsdienst
     , keys
     , mtl

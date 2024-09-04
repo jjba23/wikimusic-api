@@ -16,7 +16,7 @@
 {-# OPTIONS_GHC -fno-warn-missing-signatures #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
-module WikiMusic.Persistence.SongQuery () where
+module WikiMusic.PostgreSQL.SongQuery () where
 
 import Data.Map (elems, keys)
 import Data.Map qualified as Map
@@ -40,7 +40,7 @@ import WikiMusic.Model.Env
 import WikiMusic.Model.Other
 import WikiMusic.Model.Song
 import WikiMusic.Model.Thread as CommentThread
-import WikiMusic.Persistence.ReadAbstraction qualified as ReadAbstraction
+import WikiMusic.PostgreSQL.ReadAbstraction qualified as ReadAbstraction
 
 instance Exec SongQuery where
   execAlgebra (FetchSongs env sortOrder limit offset next) =
