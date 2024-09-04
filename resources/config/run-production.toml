@@ -21,7 +21,7 @@ origins = [
   "https://www.wikimusic.jointhefreeworld.org",
   "https://beta.wikimusic.jointhefreeworld.org",
   "https://www.beta.wikimusic.jointhefreeworld.org",
-  "http://127.0.0.1:5173"
+  "http://127.0.0.1:6923"
 ]
 methods = [ "OPTIONS", "POST", "PUT", "DELETE", "PATCH", "GET" ]
 request-headers = [ "authorization", "content-type", "credentials", "x-wikimusic-auth", "access-control-allow-origin" ]
