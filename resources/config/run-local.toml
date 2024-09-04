@@ -25,8 +25,8 @@ send-timeout-seconds = 10
 host = "email-smtp.eu-west-3.amazonaws.com"
 user-file = "./resources/secrets/amazon_ses_user"
 password-file = "./resources/secrets/amazon_ses_password"
-sender-name = "No-Reply - WikiMusic Bot"
-sender-mail = "noreply@jointhefreeworld.org"
+sender-name = "[No Reply] WikiMusic 🎵"
+sender-mail = "noreply@wikimusic.jointhefreeworld.org"
 
 [web-frontend]
 base-url = "http://127.0.0.1:6923"
