@@ -21,18 +21,20 @@
 module WikiMusic.Beam.Artist where
 
 import Data.Map qualified as Map
+import Data.UUID qualified as UUID
 import Database.Beam
 import Optics
+import Relude
 import WikiMusic.Beam.Util
 import WikiMusic.Model.Artist
 import WikiMusic.Protolude
 
 data ArtistT f = Artist'
-  { identifier :: C f UUID,
+  { identifier :: C f Text,
     displayName :: C f Text,
-    createdBy :: C f UUID,
+    createdBy :: C f Text,
     visibilityStatus :: C f Int64,
-    approvedBy :: C f (Maybe UUID),
+    approvedBy :: C f (Maybe Text),
     createdAt :: C f UTCTime,
     lastEditedAt :: C f (Maybe UTCTime),
     viewCount :: C f Int64,
@@ -45,21 +47,21 @@ makeFieldLabelsNoPrefix ''ArtistT
 type Artist' = ArtistT Identity
 
 instance Table ArtistT where
-  data PrimaryKey ArtistT f = ArtistId (Columnar f UUID) deriving (Generic, Beamable)
+  data PrimaryKey ArtistT f = ArtistId (Columnar f Text) deriving (Generic, Beamable)
   primaryKey = ArtistId . (^. #identifier)
 
-fromArtistPk :: PrimaryKey ArtistT f -> Columnar f UUID
+fromArtistPk :: PrimaryKey ArtistT f -> Columnar f Text
 fromArtistPk (ArtistId i) = i
 
 toArtist :: Artist' -> ExternalSources -> (UUID, Artist)
 toArtist x ex =
-  ( x ^. #identifier,
+  ( textToUUID $ x ^. #identifier,
     Artist
-      { identifier = x ^. #identifier,
+      { identifier = textToUUID $ x ^. #identifier,
         displayName = x ^. #displayName,
-        createdBy = x ^. #createdBy,
+        createdBy = textToUUID $ x ^. #createdBy,
         visibilityStatus = fromIntegral $ x ^. #visibilityStatus,
-        approvedBy = x ^. #approvedBy,
+        approvedBy = fmap (textToUUID) (x ^. #approvedBy),
         createdAt = x ^. #createdAt,
         lastEditedAt = x ^. #lastEditedAt,
         viewCount = fromIntegral $ x ^. #viewCount,
@@ -77,11 +79,11 @@ toArtist x ex =
 toPersistenceArtist :: Artist -> Artist'
 toPersistenceArtist x =
   Artist'
-    { identifier = x ^. #identifier,
+    { identifier = UUID.toText $ x ^. #identifier,
       displayName = x ^. #displayName,
-      createdBy = x ^. #createdBy,
+      createdBy = UUID.toText $ x ^. #createdBy,
       visibilityStatus = fromIntegral $ x ^. #visibilityStatus,
-      approvedBy = x ^. #approvedBy,
+      approvedBy = fmap (UUID.toText) (x ^. #approvedBy),
       createdAt = x ^. #createdAt,
       lastEditedAt = x ^. #lastEditedAt,
       viewCount = fromIntegral $ x ^. #viewCount,
@@ -89,13 +91,13 @@ toPersistenceArtist x =
     }
 
 data ArtistCommentT f = ArtistComment'
-  { identifier :: C f UUID,
-    parentIdentifier :: C f (Maybe UUID),
+  { identifier :: C f Text,
+    parentIdentifier :: C f (Maybe Text),
     artistIdentifier :: PrimaryKey ArtistT f,
-    createdBy :: C f UUID,
+    createdBy :: C f Text,
     visibilityStatus :: C f Int64,
     contents :: C f Text,
-    approvedBy :: C f (Maybe UUID),
+    approvedBy :: C f (Maybe Text),
     createdAt :: C f UTCTime,
     lastEditedAt :: C f (Maybe UTCTime)
   }
@@ -104,16 +106,16 @@ data ArtistCommentT f = ArtistComment'
 type ArtistComment' = ArtistCommentT Identity
 
 instance Table ArtistCommentT where
-  data PrimaryKey ArtistCommentT f = ArtistCommentId (Columnar f UUID) deriving (Generic, Beamable)
+  data PrimaryKey ArtistCommentT f = ArtistCommentId (Columnar f Text) deriving (Generic, Beamable)
   primaryKey = ArtistCommentId . (^. #identifier)
 
 makeFieldLabelsNoPrefix ''ArtistCommentT
 
 toArtistComment :: ArtistComment' -> (UUID, ArtistComment)
 toArtistComment x =
-  ( x ^. #identifier,
+  ( textToUUID $ x ^. #identifier,
     ArtistComment
-      { artistIdentifier = fromArtistPk $ x ^. #artistIdentifier,
+      { artistIdentifier = textToUUID $ fromArtistPk $ x ^. #artistIdentifier,
         comment = fromPersistenceComment x
       }
   )
@@ -121,23 +123,23 @@ toArtistComment x =
 toPersistenceArtistComment :: ArtistComment -> ArtistComment'
 toPersistenceArtistComment x =
   ArtistComment'
-    { identifier = x ^. #comment % #identifier,
-      parentIdentifier = x ^. #comment % #parentIdentifier,
-      artistIdentifier = ArtistId $ x ^. #artistIdentifier,
-      createdBy = x ^. #comment % #createdBy,
+    { identifier = UUID.toText $ x ^. #comment % #identifier,
+      parentIdentifier = fmap UUID.toText (x ^. #comment % #parentIdentifier),
+      artistIdentifier = ArtistId . UUID.toText $ x ^. #artistIdentifier,
+      createdBy = UUID.toText $ x ^. #comment % #createdBy,
       visibilityStatus = fromIntegral $ x ^. #comment % #visibilityStatus,
       contents = x ^. #comment % #contents,
-      approvedBy = x ^. #comment % #approvedBy,
+      approvedBy = fmap (UUID.toText) (x ^. #comment % #approvedBy),
       createdAt = x ^. #comment % #createdAt,
       lastEditedAt = x ^. #comment % #lastEditedAt
     }
 
 data ArtistArtworkT f = ArtistArtwork'
-  { identifier :: C f UUID,
+  { identifier :: C f Text,
     artistIdentifier :: PrimaryKey ArtistT f,
-    createdBy :: C f UUID,
+    createdBy :: C f Text,
     visibilityStatus :: C f Int64,
-    approvedBy :: C f (Maybe UUID),
+    approvedBy :: C f (Maybe Text),
     contentUrl :: C f Text,
     contentCaption :: C f (Maybe Text),
     orderValue :: C f Int64,
@@ -149,16 +151,16 @@ data ArtistArtworkT f = ArtistArtwork'
 type ArtistArtwork' = ArtistArtworkT Identity
 
 instance Table ArtistArtworkT where
-  data PrimaryKey ArtistArtworkT f = ArtistArtworkId (Columnar f UUID) deriving (Generic, Beamable)
+  data PrimaryKey ArtistArtworkT f = ArtistArtworkId (Columnar f Text) deriving (Generic, Beamable)
   primaryKey = ArtistArtworkId . (^. #identifier)
 
 makeFieldLabelsNoPrefix ''ArtistArtworkT
 
 toArtistArtwork :: ArtistArtwork' -> (UUID, ArtistArtwork)
 toArtistArtwork x =
-  ( x ^. #identifier,
+  ( textToUUID $ x ^. #identifier,
     ArtistArtwork
-      { artistIdentifier = fromArtistPk $ x ^. #artistIdentifier,
+      { artistIdentifier = textToUUID $ fromArtistPk $ x ^. #artistIdentifier,
         artwork = fromPersistenceArtwork x
       }
   )
@@ -166,22 +168,22 @@ toArtistArtwork x =
 mkArtistArtworkP :: ArtistArtwork -> ArtistArtwork'
 mkArtistArtworkP x =
   ArtistArtwork'
-    { identifier = x ^. #artwork % #identifier,
-      artistIdentifier = ArtistId $ x ^. #artistIdentifier,
-      createdBy = x ^. #artwork % #createdBy,
+    { identifier = UUID.toText $ x ^. #artwork % #identifier,
+      artistIdentifier = ArtistId $ UUID.toText $ x ^. #artistIdentifier,
+      createdBy = UUID.toText $ x ^. #artwork % #createdBy,
       visibilityStatus = fromIntegral $ x ^. #artwork % #visibilityStatus,
       contentUrl = x ^. #artwork % #contentUrl,
       contentCaption = x ^. #artwork % #contentCaption,
       orderValue = fromIntegral $ x ^. #artwork % #orderValue,
-      approvedBy = x ^. #artwork % #approvedBy,
+      approvedBy = fmap (UUID.toText) (x ^. #artwork % #approvedBy),
       createdAt = x ^. #artwork % #createdAt,
       lastEditedAt = x ^. #artwork % #lastEditedAt
     }
 
 data ArtistOpinionT f = ArtistOpinion'
-  { identifier :: C f UUID,
+  { identifier :: C f Text,
     artistIdentifier :: PrimaryKey ArtistT f,
-    createdBy :: C f UUID,
+    createdBy :: C f Text,
     isLike :: C f Bool,
     isDislike :: C f Bool,
     createdAt :: C f UTCTime,
@@ -192,24 +194,24 @@ data ArtistOpinionT f = ArtistOpinion'
 type ArtistOpinion' = ArtistOpinionT Identity
 
 instance Table ArtistOpinionT where
-  data PrimaryKey ArtistOpinionT f = ArtistOpinionId (Columnar f UUID) deriving (Generic, Beamable)
+  data PrimaryKey ArtistOpinionT f = ArtistOpinionId (Columnar f Text) deriving (Generic, Beamable)
   primaryKey = ArtistOpinionId . (^. #identifier)
 
 makeFieldLabelsNoPrefix ''ArtistOpinionT
 
 toArtistOpinion :: ArtistOpinion' -> (UUID, ArtistOpinion)
 toArtistOpinion x =
-  ( x ^. #identifier,
+  ( textToUUID $ x ^. #identifier,
     ArtistOpinion
-      { artistIdentifier = fromArtistPk $ x ^. #artistIdentifier,
+      { artistIdentifier = textToUUID $ fromArtistPk $ x ^. #artistIdentifier,
         opinion = fromPersistenceOpinion x
       }
   )
 
 data ArtistExternalSourcesT f = ArtistExternalSources'
-  { identifier :: C f UUID,
+  { identifier :: C f Text,
     artistIdentifier :: PrimaryKey ArtistT f,
-    createdBy :: C f UUID,
+    createdBy :: C f Text,
     spotifyUrl :: C f (Maybe Text),
     youtubeUrl :: C f (Maybe Text),
     soundcloudUrl :: C f (Maybe Text),
@@ -222,7 +224,7 @@ data ArtistExternalSourcesT f = ArtistExternalSources'
 type ArtistExternalSources' = ArtistExternalSourcesT Identity
 
 instance Table ArtistExternalSourcesT where
-  data PrimaryKey ArtistExternalSourcesT f = ArtistExternalSourcesId (Columnar f UUID) deriving (Generic, Beamable)
+  data PrimaryKey ArtistExternalSourcesT f = ArtistExternalSourcesId (Columnar f Text) deriving (Generic, Beamable)
   primaryKey = ArtistExternalSourcesId . (^. #identifier)
 
 makeFieldLabelsNoPrefix ''ArtistExternalSourcesT
@@ -230,9 +232,9 @@ makeFieldLabelsNoPrefix ''ArtistExternalSourcesT
 toPersistenceArtistExternalContents :: Artist -> UUID -> ArtistExternalSources'
 toPersistenceArtistExternalContents x newIdentifier =
   ArtistExternalSources'
-    { identifier = newIdentifier,
-      artistIdentifier = ArtistId $ x ^. #identifier,
-      createdBy = x ^. #createdBy,
+    { identifier = UUID.toText $ newIdentifier,
+      artistIdentifier = ArtistId $ UUID.toText $ x ^. #identifier,
+      createdBy = UUID.toText $ x ^. #createdBy,
       spotifyUrl = x ^. #spotifyUrl,
       youtubeUrl = x ^. #youtubeUrl,
       soundcloudUrl = x ^. #soundcloudUrl,
@@ -244,9 +246,9 @@ toPersistenceArtistExternalContents x newIdentifier =
 mkArtistExSourcesP :: ArtistExternalSources -> ArtistExternalSources'
 mkArtistExSourcesP x =
   ArtistExternalSources'
-    { identifier = x ^. #identifier,
-      artistIdentifier = ArtistId $ x ^. #artistIdentifier,
-      createdBy = x ^. #createdBy,
+    { identifier = UUID.toText $ x ^. #identifier,
+      artistIdentifier = ArtistId $ UUID.toText $ x ^. #artistIdentifier,
+      createdBy = UUID.toText $ x ^. #createdBy,
       spotifyUrl = x ^. #spotifyUrl,
       youtubeUrl = x ^. #youtubeUrl,
       soundcloudUrl = x ^. #soundcloudUrl,
@@ -327,9 +329,9 @@ artistExternalSourcesTModification =
 mkArtistOpinionP :: ArtistOpinion -> ArtistOpinion'
 mkArtistOpinionP x =
   ArtistOpinion'
-    { identifier = x ^. #opinion % #identifier,
-      artistIdentifier = ArtistId $ x ^. #artistIdentifier,
-      createdBy = x ^. #opinion % #createdBy,
+    { identifier = UUID.toText $ x ^. #opinion % #identifier,
+      artistIdentifier = ArtistId $ UUID.toText $ x ^. #artistIdentifier,
+      createdBy = UUID.toText $ x ^. #opinion % #createdBy,
       isLike = x ^. #opinion % #isLike,
       isDislike = x ^. #opinion % #isDislike,
       createdAt = x ^. #opinion % #createdAt,

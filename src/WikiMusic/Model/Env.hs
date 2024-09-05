@@ -9,16 +9,15 @@ module WikiMusic.Model.Env
 where
 
 import Data.Time
-import Database.Beam.Sqlite (Connection)
-import Hasql.Pool qualified
+import Database.Beam.Sqlite.Connection
+import Database.SQLite.Simple
 import Network.Wai.Logger (ApacheLogger)
 import Optics
 import Relude
 import WikiMusic.Model.Config
 
 data Env = Env
-  { pool :: Hasql.Pool.Pool,
-    cfg :: AppConfig,
+  { cfg :: AppConfig,
     processStartedAt :: UTCTime,
     logger :: ApacheLogger,
     conn :: Connection,

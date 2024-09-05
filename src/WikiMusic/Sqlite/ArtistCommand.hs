@@ -344,4 +344,3 @@ instance Exec ArtistCommand where
     next =<< newArtistOpinionFromRequest' createdBy req
   execAlgebra (NewArtistArtworkFromRequest createdBy req next) =
     next =<< newArtistArtworkFromRequest' createdBy req
-

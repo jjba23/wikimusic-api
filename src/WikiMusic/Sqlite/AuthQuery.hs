@@ -6,6 +6,7 @@
 
 module WikiMusic.Sqlite.AuthQuery () where
 
+import Data.Text qualified as T
 import Database.Beam
 import Database.Beam.Sqlite
 import Relude
@@ -27,7 +28,7 @@ instance Exec AuthQuery where
 fetchMe' :: (MonadIO m) => Env -> UUID -> m (Either AuthQueryError (Maybe WikiMusicUser))
 fetchMe' env identifier = do
   maybeUser <- liftIO . runBeamSqliteDebug putStrLn (env ^. #conn) . runSelectReturningFirst . select $ do
-    filter_ (\s -> (s ^. #identifier) ==. val_ identifier)
+    filter_ (\s -> (s ^. #identifier) ==. val_ (T.pack . show $ identifier))
       $ all_ ((^. #users) wikiMusicDatabase)
   case maybeUser of
     Nothing -> pure . Left $ AuthError "User did not exist"

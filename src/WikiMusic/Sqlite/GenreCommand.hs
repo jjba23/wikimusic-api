@@ -12,7 +12,6 @@ import Data.Map qualified as Map
 import Data.Text (pack)
 import Database.Beam
 import Database.Beam.Sqlite
-import Hasql.Pool qualified
 import Relude
 import WikiMusic.Beam.Database
 import WikiMusic.Beam.Genre
@@ -358,4 +357,3 @@ instance Exec GenreCommand where
     next =<< newGenreOpinionFromRequest' createdBy req
   execAlgebra (NewGenreArtworkFromRequest createdBy req next) =
     next =<< newGenreArtworkFromRequest' createdBy req
-

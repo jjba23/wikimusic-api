@@ -78,6 +78,7 @@ library
       WikiMusic.Sqlite.UserQuery
       WikiMusic.Sqlite.UserCommand
       
+      
       -- λ clock
       WikiMusic.Clock.LiveClock
 
@@ -160,6 +161,7 @@ library
     , beam-core
     , beam-sqlite
     , beam-migrate
+    , sqlite-simple
   default-language: GHC2021
 
 executable wikimusic-api-exe

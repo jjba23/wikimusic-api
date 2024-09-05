@@ -21,6 +21,7 @@
 
 module WikiMusic.Beam.Relations where
 
+import Data.UUID qualified as UUID
 import Database.Beam
 import Optics
 import WikiMusic.Beam.Artist
@@ -30,10 +31,10 @@ import WikiMusic.Model.Song
 import WikiMusic.Protolude
 
 data SongArtistT f = SongArtist'
-  { identifier :: C f UUID,
+  { identifier :: C f Text,
     songIdentifier :: PrimaryKey SongT f,
     artistIdentifier :: PrimaryKey ArtistT f,
-    createdBy :: C f UUID,
+    createdBy :: C f Text,
     createdAt :: C f UTCTime
   }
   deriving (Generic, Beamable)
@@ -41,7 +42,7 @@ data SongArtistT f = SongArtist'
 type SongArtist' = SongArtistT Identity
 
 instance Table SongArtistT where
-  data PrimaryKey SongArtistT f = SongArtistId (Columnar f UUID) deriving (Generic, Beamable)
+  data PrimaryKey SongArtistT f = SongArtistId (Columnar f Text) deriving (Generic, Beamable)
   primaryKey = SongArtistId . (^. #identifier)
 
 makeFieldLabelsNoPrefix ''SongArtistT
@@ -57,10 +58,10 @@ songArtistTModification =
     }
 
 data SongGenreT f = SongGenre'
-  { identifier :: C f UUID,
+  { identifier :: C f Text,
     songIdentifier :: PrimaryKey SongT f,
     genreIdentifier :: PrimaryKey GenreT f,
-    createdBy :: C f UUID,
+    createdBy :: C f Text,
     createdAt :: C f UTCTime
   }
   deriving (Generic, Beamable)
@@ -68,7 +69,7 @@ data SongGenreT f = SongGenre'
 type SongGenre' = SongGenreT Identity
 
 instance Table SongGenreT where
-  data PrimaryKey SongGenreT f = SongGenreId (Columnar f UUID) deriving (Generic, Beamable)
+  data PrimaryKey SongGenreT f = SongGenreId (Columnar f Text) deriving (Generic, Beamable)
   primaryKey = SongGenreId . (^. #identifier)
 
 makeFieldLabelsNoPrefix ''SongGenreT
@@ -84,10 +85,10 @@ songGenreTModification =
     }
 
 data ArtistGenreT f = ArtistGenre'
-  { identifier :: C f UUID,
+  { identifier :: C f Text,
     artistIdentifier :: PrimaryKey ArtistT f,
     genreIdentifier :: PrimaryKey GenreT f,
-    createdBy :: C f UUID,
+    createdBy :: C f Text,
     createdAt :: C f UTCTime
   }
   deriving (Generic, Beamable)
@@ -95,7 +96,7 @@ data ArtistGenreT f = ArtistGenre'
 type ArtistGenre' = ArtistGenreT Identity
 
 instance Table ArtistGenreT where
-  data PrimaryKey ArtistGenreT f = ArtistGenreId (Columnar f UUID) deriving (Generic, Beamable)
+  data PrimaryKey ArtistGenreT f = ArtistGenreId (Columnar f Text) deriving (Generic, Beamable)
   primaryKey = ArtistGenreId . (^. #identifier)
 
 makeFieldLabelsNoPrefix ''ArtistGenreT
@@ -113,10 +114,10 @@ artistGenreTModification =
 mkSongArtistP :: ArtistOfSong -> SongArtist'
 mkSongArtistP x =
   SongArtist'
-    { identifier = x ^. #identifier,
-      songIdentifier = SongId $ x ^. #songIdentifier,
-      artistIdentifier = ArtistId $ x ^. #artistIdentifier,
-      createdBy = x ^. #createdBy,
+    { identifier = UUID.toText $ x ^. #identifier,
+      songIdentifier = SongId $ UUID.toText $ x ^. #songIdentifier,
+      artistIdentifier = ArtistId $ UUID.toText $ x ^. #artistIdentifier,
+      createdBy = UUID.toText $ x ^. #createdBy,
       createdAt = x ^. #createdAt
     }
 

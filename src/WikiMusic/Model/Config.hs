@@ -4,17 +4,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE NoFieldSelectors #-}
 
-module WikiMusic.Model.Config
-  ( AppConfig (..),
-    SqliteConfig (..),
-    RedisConfig (..),
-    ServantConfig (..),
-    CorsConfig (..),
-    MailConfig (..),
-    WebFrontendConfig (..),
-    appConfigCodec,
-  )
-where
+module WikiMusic.Model.Config where
 
 import Optics
 import Relude

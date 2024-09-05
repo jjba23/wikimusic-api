@@ -21,6 +21,7 @@
 module WikiMusic.Beam.Genre where
 
 import Data.Map qualified as Map
+import Data.UUID qualified as UUID
 import Database.Beam
 import Optics
 import WikiMusic.Beam.Util
@@ -28,12 +29,12 @@ import WikiMusic.Model.Genre
 import WikiMusic.Protolude
 
 data GenreT f = Genre'
-  { identifier :: C f UUID,
-    parentIdentifier :: C f (Maybe UUID),
+  { identifier :: C f Text,
+    parentIdentifier :: C f (Maybe Text),
     displayName :: C f Text,
-    createdBy :: C f UUID,
+    createdBy :: C f Text,
     visibilityStatus :: C f Int64,
-    approvedBy :: C f (Maybe UUID),
+    approvedBy :: C f (Maybe Text),
     createdAt :: C f UTCTime,
     lastEditedAt :: C f (Maybe UTCTime),
     viewCount :: C f Int64,
@@ -46,22 +47,22 @@ makeFieldLabelsNoPrefix ''GenreT
 type Genre' = GenreT Identity
 
 instance Table GenreT where
-  data PrimaryKey GenreT f = GenreId (Columnar f UUID) deriving (Generic, Beamable)
+  data PrimaryKey GenreT f = GenreId (Columnar f Text) deriving (Generic, Beamable)
   primaryKey = GenreId . (^. #identifier)
 
-fromGenrePk :: PrimaryKey GenreT f -> Columnar f UUID
+fromGenrePk :: PrimaryKey GenreT f -> Columnar f Text
 fromGenrePk (GenreId i) = i
 
 toGenre :: Genre' -> ExternalSources -> (UUID, Genre)
 toGenre x ex =
-  ( x ^. #identifier,
+  ( textToUUID $ x ^. #identifier,
     Genre
-      { identifier = x ^. #identifier,
-        parentIdentifier = x ^. #parentIdentifier,
+      { identifier = textToUUID $ x ^. #identifier,
+        parentIdentifier = fmap textToUUID $ x ^. #parentIdentifier,
         displayName = x ^. #displayName,
-        createdBy = x ^. #createdBy,
+        createdBy = textToUUID $ x ^. #createdBy,
         visibilityStatus = fromIntegral $ x ^. #visibilityStatus,
-        approvedBy = x ^. #approvedBy,
+        approvedBy = fmap textToUUID $ x ^. #approvedBy,
         createdAt = x ^. #createdAt,
         lastEditedAt = x ^. #lastEditedAt,
         viewCount = fromIntegral $ x ^. #viewCount,
@@ -79,12 +80,12 @@ toGenre x ex =
 toPersistenceGenre :: Genre -> Genre'
 toPersistenceGenre x =
   Genre'
-    { identifier = x ^. #identifier,
-      parentIdentifier = x ^. #parentIdentifier,
+    { identifier = UUID.toText $ x ^. #identifier,
+      parentIdentifier = fmap UUID.toText $ x ^. #parentIdentifier,
       displayName = x ^. #displayName,
-      createdBy = x ^. #createdBy,
+      createdBy = UUID.toText $ x ^. #createdBy,
       visibilityStatus = fromIntegral $ x ^. #visibilityStatus,
-      approvedBy = x ^. #approvedBy,
+      approvedBy = fmap UUID.toText $ x ^. #approvedBy,
       createdAt = x ^. #createdAt,
       lastEditedAt = x ^. #lastEditedAt,
       viewCount = fromIntegral $ x ^. #viewCount,
@@ -92,13 +93,13 @@ toPersistenceGenre x =
     }
 
 data GenreCommentT f = GenreComment'
-  { identifier :: C f UUID,
-    parentIdentifier :: C f (Maybe UUID),
+  { identifier :: C f Text,
+    parentIdentifier :: C f (Maybe Text),
     genreIdentifier :: PrimaryKey GenreT f,
-    createdBy :: C f UUID,
+    createdBy :: C f Text,
     visibilityStatus :: C f Int64,
     contents :: C f Text,
-    approvedBy :: C f (Maybe UUID),
+    approvedBy :: C f (Maybe Text),
     createdAt :: C f UTCTime,
     lastEditedAt :: C f (Maybe UTCTime)
   }
@@ -107,16 +108,16 @@ data GenreCommentT f = GenreComment'
 type GenreComment' = GenreCommentT Identity
 
 instance Table GenreCommentT where
-  data PrimaryKey GenreCommentT f = GenreCommentId (Columnar f UUID) deriving (Generic, Beamable)
+  data PrimaryKey GenreCommentT f = GenreCommentId (Columnar f Text) deriving (Generic, Beamable)
   primaryKey = GenreCommentId . (^. #identifier)
 
 makeFieldLabelsNoPrefix ''GenreCommentT
 
 toGenreComment :: GenreComment' -> (UUID, GenreComment)
 toGenreComment x =
-  ( x ^. #identifier,
+  ( textToUUID $ x ^. #identifier,
     GenreComment
-      { genreIdentifier = fromGenrePk $ x ^. #genreIdentifier,
+      { genreIdentifier = textToUUID $ fromGenrePk $ x ^. #genreIdentifier,
         comment = fromPersistenceComment x
       }
   )
@@ -124,23 +125,23 @@ toGenreComment x =
 mkGenreCommentP :: GenreComment -> GenreComment'
 mkGenreCommentP x =
   GenreComment'
-    { identifier = x ^. #comment % #identifier,
-      parentIdentifier = x ^. #comment % #parentIdentifier,
-      genreIdentifier = GenreId $ x ^. #genreIdentifier,
-      createdBy = x ^. #comment % #createdBy,
+    { identifier = UUID.toText $ x ^. #comment % #identifier,
+      parentIdentifier = fmap UUID.toText $ x ^. #comment % #parentIdentifier,
+      genreIdentifier = GenreId $ UUID.toText $ x ^. #genreIdentifier,
+      createdBy = UUID.toText $ x ^. #comment % #createdBy,
       visibilityStatus = fromIntegral $ x ^. #comment % #visibilityStatus,
       contents = x ^. #comment % #contents,
-      approvedBy = x ^. #comment % #approvedBy,
+      approvedBy = fmap UUID.toText $ x ^. #comment % #approvedBy,
       createdAt = x ^. #comment % #createdAt,
       lastEditedAt = x ^. #comment % #lastEditedAt
     }
 
 data GenreArtworkT f = GenreArtwork'
-  { identifier :: C f UUID,
+  { identifier :: C f Text,
     genreIdentifier :: PrimaryKey GenreT f,
-    createdBy :: C f UUID,
+    createdBy :: C f Text,
     visibilityStatus :: C f Int64,
-    approvedBy :: C f (Maybe UUID),
+    approvedBy :: C f (Maybe Text),
     contentUrl :: C f Text,
     contentCaption :: C f (Maybe Text),
     orderValue :: C f Int64,
@@ -152,16 +153,16 @@ data GenreArtworkT f = GenreArtwork'
 type GenreArtwork' = GenreArtworkT Identity
 
 instance Table GenreArtworkT where
-  data PrimaryKey GenreArtworkT f = GenreArtworkId (Columnar f UUID) deriving (Generic, Beamable)
+  data PrimaryKey GenreArtworkT f = GenreArtworkId (Columnar f Text) deriving (Generic, Beamable)
   primaryKey = GenreArtworkId . (^. #identifier)
 
 makeFieldLabelsNoPrefix ''GenreArtworkT
 
 toGenreArtwork :: GenreArtwork' -> (UUID, GenreArtwork)
 toGenreArtwork x =
-  ( x ^. #identifier,
+  ( textToUUID $ x ^. #identifier,
     GenreArtwork
-      { genreIdentifier = fromGenrePk $ x ^. #genreIdentifier,
+      { genreIdentifier = textToUUID $ fromGenrePk $ x ^. #genreIdentifier,
         artwork = fromPersistenceArtwork x
       }
   )
@@ -169,22 +170,22 @@ toGenreArtwork x =
 mkGenreArtworkP :: GenreArtwork -> GenreArtwork'
 mkGenreArtworkP x =
   GenreArtwork'
-    { identifier = x ^. #artwork % #identifier,
-      genreIdentifier = GenreId $ x ^. #genreIdentifier,
-      createdBy = x ^. #artwork % #createdBy,
+    { identifier = UUID.toText $ x ^. #artwork % #identifier,
+      genreIdentifier = GenreId $ UUID.toText $ x ^. #genreIdentifier,
+      createdBy = UUID.toText $ x ^. #artwork % #createdBy,
       visibilityStatus = fromIntegral $ x ^. #artwork % #visibilityStatus,
       contentUrl = x ^. #artwork % #contentUrl,
       contentCaption = x ^. #artwork % #contentCaption,
       orderValue = fromIntegral $ x ^. #artwork % #orderValue,
-      approvedBy = x ^. #artwork % #approvedBy,
+      approvedBy = fmap UUID.toText $ x ^. #artwork % #approvedBy,
       createdAt = x ^. #artwork % #createdAt,
       lastEditedAt = x ^. #artwork % #lastEditedAt
     }
 
 data GenreOpinionT f = GenreOpinion'
-  { identifier :: C f UUID,
+  { identifier :: C f Text,
     genreIdentifier :: PrimaryKey GenreT f,
-    createdBy :: C f UUID,
+    createdBy :: C f Text,
     isLike :: C f Bool,
     isDislike :: C f Bool,
     createdAt :: C f UTCTime,
@@ -195,16 +196,16 @@ data GenreOpinionT f = GenreOpinion'
 type GenreOpinion' = GenreOpinionT Identity
 
 instance Table GenreOpinionT where
-  data PrimaryKey GenreOpinionT f = GenreOpinionId (Columnar f UUID) deriving (Generic, Beamable)
+  data PrimaryKey GenreOpinionT f = GenreOpinionId (Columnar f Text) deriving (Generic, Beamable)
   primaryKey = GenreOpinionId . (^. #identifier)
 
 makeFieldLabelsNoPrefix ''GenreOpinionT
 
 toGenreOpinion :: GenreOpinion' -> (UUID, GenreOpinion)
 toGenreOpinion x =
-  ( x ^. #identifier,
+  ( textToUUID $ x ^. #identifier,
     GenreOpinion
-      { genreIdentifier = fromGenrePk $ x ^. #genreIdentifier,
+      { genreIdentifier = textToUUID $ fromGenrePk $ x ^. #genreIdentifier,
         opinion = fromPersistenceOpinion x
       }
   )
@@ -212,9 +213,9 @@ toGenreOpinion x =
 mkGenreOpinionP :: GenreOpinion -> GenreOpinion'
 mkGenreOpinionP x =
   GenreOpinion'
-    { identifier = x ^. #opinion % #identifier,
-      genreIdentifier = GenreId $ x ^. #genreIdentifier,
-      createdBy = x ^. #opinion % #createdBy,
+    { identifier = UUID.toText $ x ^. #opinion % #identifier,
+      genreIdentifier = GenreId $ UUID.toText $ x ^. #genreIdentifier,
+      createdBy = UUID.toText $ x ^. #opinion % #createdBy,
       isLike = x ^. #opinion % #isLike,
       isDislike = x ^. #opinion % #isDislike,
       createdAt = x ^. #opinion % #createdAt,
@@ -222,9 +223,9 @@ mkGenreOpinionP x =
     }
 
 data GenreExternalSourcesT f = GenreExternalSources'
-  { identifier :: C f UUID,
+  { identifier :: C f Text,
     genreIdentifier :: PrimaryKey GenreT f,
-    createdBy :: C f UUID,
+    createdBy :: C f Text,
     spotifyUrl :: C f (Maybe Text),
     youtubeUrl :: C f (Maybe Text),
     soundcloudUrl :: C f (Maybe Text),
@@ -237,7 +238,7 @@ data GenreExternalSourcesT f = GenreExternalSources'
 type GenreExternalSources' = GenreExternalSourcesT Identity
 
 instance Table GenreExternalSourcesT where
-  data PrimaryKey GenreExternalSourcesT f = GenreExternalSourcesId (Columnar f UUID) deriving (Generic, Beamable)
+  data PrimaryKey GenreExternalSourcesT f = GenreExternalSourcesId (Columnar f Text) deriving (Generic, Beamable)
   primaryKey = GenreExternalSourcesId . (^. #identifier)
 
 makeFieldLabelsNoPrefix ''GenreExternalSourcesT
@@ -245,9 +246,9 @@ makeFieldLabelsNoPrefix ''GenreExternalSourcesT
 toPersistenceGenreExternalContents :: Genre -> UUID -> GenreExternalSources'
 toPersistenceGenreExternalContents x newIdentifier =
   GenreExternalSources'
-    { identifier = newIdentifier,
-      genreIdentifier = GenreId $ x ^. #identifier,
-      createdBy = x ^. #createdBy,
+    { identifier = UUID.toText $ newIdentifier,
+      genreIdentifier = GenreId $ UUID.toText $ x ^. #identifier,
+      createdBy = UUID.toText $ x ^. #createdBy,
       spotifyUrl = x ^. #spotifyUrl,
       youtubeUrl = x ^. #youtubeUrl,
       soundcloudUrl = x ^. #soundcloudUrl,
@@ -259,9 +260,9 @@ toPersistenceGenreExternalContents x newIdentifier =
 toPersistenceGenreExternalSources :: GenreExternalSources -> GenreExternalSources'
 toPersistenceGenreExternalSources x =
   GenreExternalSources'
-    { identifier = x ^. #identifier,
-      genreIdentifier = GenreId $ x ^. #genreIdentifier,
-      createdBy = x ^. #createdBy,
+    { identifier = UUID.toText $ x ^. #identifier,
+      genreIdentifier = GenreId $ UUID.toText $ x ^. #genreIdentifier,
+      createdBy = UUID.toText $ x ^. #createdBy,
       spotifyUrl = x ^. #spotifyUrl,
       youtubeUrl = x ^. #youtubeUrl,
       soundcloudUrl = x ^. #soundcloudUrl,

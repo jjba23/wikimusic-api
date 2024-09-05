@@ -12,12 +12,17 @@
 
 module WikiMusic.Beam.Util where
 
+import Data.UUID qualified as UUID
 import Database.Beam
 import Optics
+import Relude
+import Relude.Unsafe qualified as Unsafe
 import WikiMusic.Model.Artwork
 import WikiMusic.Model.Comment
 import WikiMusic.Model.Opinion
-import WikiMusic.Protolude
+
+textToUUID :: Text -> UUID.UUID
+textToUUID = Unsafe.fromJust . UUID.fromText
 
 fromPersistenceArtwork x =
   Artwork

@@ -21,23 +21,25 @@
 module WikiMusic.Beam.Song where
 
 import Data.Map qualified as Map
+import Data.UUID qualified as UUID
 import Database.Beam
 import Optics
+import Relude
 import WikiMusic.Beam.Util
 import WikiMusic.Model.Song
 import WikiMusic.Protolude
 
 data SongT f = Song'
-  { identifier :: C f UUID,
+  { identifier :: C f Text,
     displayName :: C f Text,
     musicKey :: C f (Maybe Text),
     musicTuning :: C f (Maybe Text),
     musicCreationDate :: C f (Maybe Text),
     albumName :: C f (Maybe Text),
     albumInfoLink :: C f (Maybe Text),
-    createdBy :: C f UUID,
+    createdBy :: C f Text,
     visibilityStatus :: C f Int64,
-    approvedBy :: C f (Maybe UUID),
+    approvedBy :: C f (Maybe Text),
     createdAt :: C f UTCTime,
     lastEditedAt :: C f (Maybe UTCTime),
     viewCount :: C f Int64,
@@ -50,26 +52,26 @@ makeFieldLabelsNoPrefix ''SongT
 type Song' = SongT Identity
 
 instance Table SongT where
-  data PrimaryKey SongT f = SongId (Columnar f UUID) deriving (Generic, Beamable)
+  data PrimaryKey SongT f = SongId (Columnar f Text) deriving (Generic, Beamable)
   primaryKey = SongId . (^. #identifier)
 
-fromSongPk :: PrimaryKey SongT f -> Columnar f UUID
+fromSongPk :: PrimaryKey SongT f -> Columnar f Text
 fromSongPk (SongId i) = i
 
 toSong :: Song' -> ExternalSources -> (UUID, Song)
 toSong x ex =
-  ( x ^. #identifier,
+  ( textToUUID $ x ^. #identifier,
     Song
-      { identifier = x ^. #identifier,
+      { identifier = textToUUID $ x ^. #identifier,
         musicKey = x ^. #musicKey,
         musicTuning = x ^. #musicTuning,
         musicCreationDate = x ^. #musicCreationDate,
         albumName = x ^. #albumName,
         albumInfoLink = x ^. #albumInfoLink,
         displayName = x ^. #displayName,
-        createdBy = x ^. #createdBy,
+        createdBy = textToUUID $ x ^. #createdBy,
         visibilityStatus = fromIntegral $ x ^. #visibilityStatus,
-        approvedBy = x ^. #approvedBy,
+        approvedBy = fmap (textToUUID) (x ^. #approvedBy),
         createdAt = x ^. #createdAt,
         lastEditedAt = x ^. #lastEditedAt,
         viewCount = fromIntegral $ x ^. #viewCount,
@@ -89,16 +91,16 @@ toSong x ex =
 toPersistenceSong :: Song -> Song'
 toPersistenceSong x =
   Song'
-    { identifier = x ^. #identifier,
+    { identifier = UUID.toText $ x ^. #identifier,
       musicKey = x ^. #musicKey,
       musicTuning = x ^. #musicTuning,
       musicCreationDate = x ^. #musicCreationDate,
       albumName = x ^. #albumName,
       albumInfoLink = x ^. #albumInfoLink,
       displayName = x ^. #displayName,
-      createdBy = x ^. #createdBy,
+      createdBy = UUID.toText $ x ^. #createdBy,
       visibilityStatus = fromIntegral $ x ^. #visibilityStatus,
-      approvedBy = x ^. #approvedBy,
+      approvedBy = fmap (UUID.toText) (x ^. #approvedBy),
       createdAt = x ^. #createdAt,
       lastEditedAt = x ^. #lastEditedAt,
       viewCount = fromIntegral $ x ^. #viewCount,
@@ -106,13 +108,13 @@ toPersistenceSong x =
     }
 
 data SongCommentT f = SongComment'
-  { identifier :: C f UUID,
-    parentIdentifier :: C f (Maybe UUID),
+  { identifier :: C f Text,
+    parentIdentifier :: C f (Maybe Text),
     songIdentifier :: PrimaryKey SongT f,
-    createdBy :: C f UUID,
+    createdBy :: C f Text,
     visibilityStatus :: C f Int64,
     contents :: C f Text,
-    approvedBy :: C f (Maybe UUID),
+    approvedBy :: C f (Maybe Text),
     createdAt :: C f UTCTime,
     lastEditedAt :: C f (Maybe UTCTime)
   }
@@ -121,7 +123,7 @@ data SongCommentT f = SongComment'
 type SongComment' = SongCommentT Identity
 
 instance Table SongCommentT where
-  data PrimaryKey SongCommentT f = SongCommentId (Columnar f UUID) deriving (Generic, Beamable)
+  data PrimaryKey SongCommentT f = SongCommentId (Columnar f Text) deriving (Generic, Beamable)
   primaryKey = SongCommentId . (^. #identifier)
 
 makeFieldLabelsNoPrefix ''SongCommentT
@@ -129,32 +131,32 @@ makeFieldLabelsNoPrefix ''SongCommentT
 toPersistenceSongComment :: SongComment -> SongComment'
 toPersistenceSongComment x =
   SongComment'
-    { identifier = x ^. #comment % #identifier,
-      parentIdentifier = x ^. #comment % #parentIdentifier,
-      songIdentifier = SongId $ x ^. #songIdentifier,
-      createdBy = x ^. #comment % #createdBy,
+    { identifier = UUID.toText $ x ^. #comment % #identifier,
+      parentIdentifier = fmap (UUID.toText) (x ^. #comment % #parentIdentifier),
+      songIdentifier = SongId . UUID.toText $ x ^. #songIdentifier,
+      createdBy = UUID.toText $ x ^. #comment % #createdBy,
       visibilityStatus = fromIntegral $ x ^. #comment % #visibilityStatus,
       contents = x ^. #comment % #contents,
-      approvedBy = x ^. #comment % #approvedBy,
+      approvedBy = fmap (UUID.toText) (x ^. #comment % #approvedBy),
       createdAt = x ^. #comment % #createdAt,
       lastEditedAt = x ^. #comment % #lastEditedAt
     }
 
 toSongComment :: SongComment' -> (UUID, SongComment)
 toSongComment x =
-  ( x ^. #identifier,
+  ( textToUUID $ x ^. #identifier,
     SongComment
-      { songIdentifier = fromSongPk $ x ^. #songIdentifier,
-        comment = fromPersistenceComment x
+      { songIdentifier = textToUUID $ fromSongPk $ x ^. #songIdentifier,
+        comment = fromPersistenceComment $ x
       }
   )
 
 data SongArtworkT f = SongArtwork'
-  { identifier :: C f UUID,
+  { identifier :: C f Text,
     songIdentifier :: PrimaryKey SongT f,
-    createdBy :: C f UUID,
+    createdBy :: C f Text,
     visibilityStatus :: C f Int64,
-    approvedBy :: C f (Maybe UUID),
+    approvedBy :: C f (Maybe Text),
     contentUrl :: C f Text,
     contentCaption :: C f (Maybe Text),
     orderValue :: C f Int64,
@@ -166,16 +168,16 @@ data SongArtworkT f = SongArtwork'
 type SongArtwork' = SongArtworkT Identity
 
 instance Table SongArtworkT where
-  data PrimaryKey SongArtworkT f = SongArtworkId (Columnar f UUID) deriving (Generic, Beamable)
+  data PrimaryKey SongArtworkT f = SongArtworkId (Columnar f Text) deriving (Generic, Beamable)
   primaryKey = SongArtworkId . (^. #identifier)
 
 makeFieldLabelsNoPrefix ''SongArtworkT
 
 toSongArtwork :: SongArtwork' -> (UUID, SongArtwork)
 toSongArtwork x =
-  ( x ^. #identifier,
+  ( textToUUID $ x ^. #identifier,
     SongArtwork
-      { songIdentifier = fromSongPk $ x ^. #songIdentifier,
+      { songIdentifier = textToUUID $ fromSongPk $ x ^. #songIdentifier,
         artwork = fromPersistenceArtwork x
       }
   )
@@ -183,22 +185,22 @@ toSongArtwork x =
 mkSongArtworkP :: SongArtwork -> SongArtwork'
 mkSongArtworkP x =
   SongArtwork'
-    { identifier = x ^. #artwork % #identifier,
-      songIdentifier = SongId $ x ^. #songIdentifier,
-      createdBy = x ^. #artwork % #createdBy,
+    { identifier = UUID.toText $ x ^. #artwork % #identifier,
+      songIdentifier = SongId $ UUID.toText $ x ^. #songIdentifier,
+      createdBy = UUID.toText $ x ^. #artwork % #createdBy,
       visibilityStatus = fromIntegral $ x ^. #artwork % #visibilityStatus,
       contentUrl = x ^. #artwork % #contentUrl,
       contentCaption = x ^. #artwork % #contentCaption,
       orderValue = fromIntegral $ x ^. #artwork % #orderValue,
-      approvedBy = x ^. #artwork % #approvedBy,
+      approvedBy = fmap UUID.toText $ x ^. #artwork % #approvedBy,
       createdAt = x ^. #artwork % #createdAt,
       lastEditedAt = x ^. #artwork % #lastEditedAt
     }
 
 data SongOpinionT f = SongOpinion'
-  { identifier :: C f UUID,
+  { identifier :: C f Text,
     songIdentifier :: PrimaryKey SongT f,
-    createdBy :: C f UUID,
+    createdBy :: C f Text,
     isLike :: C f Bool,
     isDislike :: C f Bool,
     createdAt :: C f UTCTime,
@@ -209,24 +211,24 @@ data SongOpinionT f = SongOpinion'
 type SongOpinion' = SongOpinionT Identity
 
 instance Table SongOpinionT where
-  data PrimaryKey SongOpinionT f = SongOpinionId (Columnar f UUID) deriving (Generic, Beamable)
+  data PrimaryKey SongOpinionT f = SongOpinionId (Columnar f Text) deriving (Generic, Beamable)
   primaryKey = SongOpinionId . (^. #identifier)
 
 makeFieldLabelsNoPrefix ''SongOpinionT
 
 toSongOpinion :: SongOpinion' -> (UUID, SongOpinion)
 toSongOpinion x =
-  ( x ^. #identifier,
+  ( textToUUID $ x ^. #identifier,
     SongOpinion
-      { songIdentifier = fromSongPk $ x ^. #songIdentifier,
+      { songIdentifier = textToUUID $ fromSongPk $ x ^. #songIdentifier,
         opinion = fromPersistenceOpinion x
       }
   )
 
 data SongExternalSourcesT f = SongExternalSources'
-  { identifier :: C f UUID,
+  { identifier :: C f Text,
     songIdentifier :: PrimaryKey SongT f,
-    createdBy :: C f UUID,
+    createdBy :: C f Text,
     spotifyUrl :: C f (Maybe Text),
     youtubeUrl :: C f (Maybe Text),
     soundcloudUrl :: C f (Maybe Text),
@@ -239,7 +241,7 @@ data SongExternalSourcesT f = SongExternalSources'
 type SongExternalSources' = SongExternalSourcesT Identity
 
 instance Table SongExternalSourcesT where
-  data PrimaryKey SongExternalSourcesT f = SongExternalSourcesId (Columnar f UUID) deriving (Generic, Beamable)
+  data PrimaryKey SongExternalSourcesT f = SongExternalSourcesId (Columnar f Text) deriving (Generic, Beamable)
   primaryKey = SongExternalSourcesId . (^. #identifier)
 
 makeFieldLabelsNoPrefix ''SongExternalSourcesT
@@ -247,9 +249,9 @@ makeFieldLabelsNoPrefix ''SongExternalSourcesT
 toPersistenceSongExternalContents :: Song -> UUID -> SongExternalSources'
 toPersistenceSongExternalContents x newIdentifier =
   SongExternalSources'
-    { identifier = newIdentifier,
-      songIdentifier = SongId $ x ^. #identifier,
-      createdBy = x ^. #createdBy,
+    { identifier = UUID.toText $ newIdentifier,
+      songIdentifier = SongId $ UUID.toText $ x ^. #identifier,
+      createdBy = UUID.toText $ x ^. #createdBy,
       spotifyUrl = x ^. #spotifyUrl,
       youtubeUrl = x ^. #youtubeUrl,
       soundcloudUrl = x ^. #soundcloudUrl,
@@ -261,9 +263,9 @@ toPersistenceSongExternalContents x newIdentifier =
 toPersistenceSongExternalSources :: SongExternalSources -> SongExternalSources'
 toPersistenceSongExternalSources x =
   SongExternalSources'
-    { identifier = x ^. #identifier,
-      songIdentifier = SongId $ x ^. #songIdentifier,
-      createdBy = x ^. #createdBy,
+    { identifier = UUID.toText $ x ^. #identifier,
+      songIdentifier = SongId $ UUID.toText $ x ^. #songIdentifier,
+      createdBy = UUID.toText $ x ^. #createdBy,
       spotifyUrl = x ^. #spotifyUrl,
       youtubeUrl = x ^. #youtubeUrl,
       soundcloudUrl = x ^. #soundcloudUrl,
@@ -349,9 +351,9 @@ songExternalSourcesTModification =
 mkSongOpinionP :: SongOpinion -> SongOpinion'
 mkSongOpinionP x =
   SongOpinion'
-    { identifier = x ^. #opinion % #identifier,
-      songIdentifier = SongId $ x ^. #songIdentifier,
-      createdBy = x ^. #opinion % #createdBy,
+    { identifier = UUID.toText $ x ^. #opinion % #identifier,
+      songIdentifier = SongId $ UUID.toText $ x ^. #songIdentifier,
+      createdBy = UUID.toText $ x ^. #opinion % #createdBy,
       isLike = x ^. #opinion % #isLike,
       isDislike = x ^. #opinion % #isDislike,
       createdAt = x ^. #opinion % #createdAt,
@@ -359,12 +361,12 @@ mkSongOpinionP x =
     }
 
 data SongContentsT f = SongContents'
-  { identifier :: C f UUID,
+  { identifier :: C f Text,
     songIdentifier :: PrimaryKey SongT f,
     versionName :: C f Text,
-    createdBy :: C f UUID,
+    createdBy :: C f Text,
     visibilityStatus :: C f Int64,
-    approvedBy :: C f (Maybe UUID),
+    approvedBy :: C f (Maybe Text),
     instrumentType :: C f Text,
     asciiLegend :: C f (Maybe Text),
     asciiContents :: C f (Maybe Text),
@@ -378,7 +380,7 @@ data SongContentsT f = SongContents'
 type SongContents' = SongContentsT Identity
 
 instance Table SongContentsT where
-  data PrimaryKey SongContentsT f = SongContentsId (Columnar f UUID) deriving (Generic, Beamable)
+  data PrimaryKey SongContentsT f = SongContentsId (Columnar f Text) deriving (Generic, Beamable)
   primaryKey = SongContentsId . (^. #identifier)
 
 makeFieldLabelsNoPrefix ''SongContentsT
@@ -404,12 +406,12 @@ songContentsTModification =
 mkSongContentsP :: SongContent -> SongContents'
 mkSongContentsP x =
   SongContents'
-    { identifier = x ^. #identifier,
-      songIdentifier = SongId $ x ^. #songIdentifier,
+    { identifier = UUID.toText $ x ^. #identifier,
+      songIdentifier = SongId $ UUID.toText $ x ^. #songIdentifier,
       versionName = x ^. #versionName,
-      createdBy = x ^. #createdBy,
+      createdBy = UUID.toText $ x ^. #createdBy,
       visibilityStatus = fromIntegral $ x ^. #visibilityStatus,
-      approvedBy = x ^. #approvedBy,
+      approvedBy = fmap UUID.toText $ x ^. #approvedBy,
       instrumentType = x ^. #instrumentType,
       asciiLegend = x ^. #asciiLegend,
       asciiContents = x ^. #asciiContents,
@@ -422,12 +424,12 @@ mkSongContentsP x =
 mkSongContentsM :: SongContents' -> SongContent
 mkSongContentsM x =
   SongContent
-    { identifier = x ^. #identifier,
-      songIdentifier = fromSongPk $ x ^. #songIdentifier,
+    { identifier = textToUUID $ x ^. #identifier,
+      songIdentifier = textToUUID $ fromSongPk $ x ^. #songIdentifier,
       versionName = x ^. #versionName,
-      createdBy = x ^. #createdBy,
+      createdBy = textToUUID $ x ^. #createdBy,
       visibilityStatus = fromIntegral $ x ^. #visibilityStatus,
-      approvedBy = x ^. #approvedBy,
+      approvedBy = fmap textToUUID $ x ^. #approvedBy,
       instrumentType = x ^. #instrumentType,
       asciiLegend = x ^. #asciiLegend,
       asciiContents = x ^. #asciiContents,

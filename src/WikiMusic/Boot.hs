@@ -36,7 +36,7 @@ boot = liftIO $ withStdoutLogger $ \logger' ->
       _ -> "resources/config/run-local.toml"
 
 startWikiMusicAPI :: (MonadIO m) => ApacheLogger -> AppConfig -> m ()
-startWikiMusicAPI logger' cfg  = do
+startWikiMusicAPI logger' cfg = do
   liftIO . BL.putStr $ "Starting REST API ..."
   liftIO $ runSettings apiSettings =<< mkApp logger' cfg
   where

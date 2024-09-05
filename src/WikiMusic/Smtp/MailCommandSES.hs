@@ -9,7 +9,7 @@ module WikiMusic.Smtp.MailCommandSES () where
 
 import Data.Text qualified as T
 import Network.Mail.Mime hiding (simpleMail)
-import Network.Mail.Smtp hiding (htmlPart)
+import Network.Mail.SMTP hiding (htmlPart)
 import Optics
 import Relude
 import System.Timeout

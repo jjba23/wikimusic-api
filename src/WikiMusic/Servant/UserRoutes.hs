@@ -17,8 +17,8 @@ import WikiMusic.Interaction.Model.User
 import WikiMusic.Interaction.User
 import WikiMusic.Model.Env
 import WikiMusic.Protolude
-import WikiMusic.Smtp.MailCommandSES ()
 import WikiMusic.Servant.Utilities
+import WikiMusic.Smtp.MailCommandSES ()
 import WikiMusic.Sqlite.UserCommand ()
 import WikiMusic.Sqlite.UserQuery ()
 

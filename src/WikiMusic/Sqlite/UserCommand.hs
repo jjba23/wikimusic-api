@@ -19,10 +19,6 @@ import Data.Text (pack)
 import Data.UUID.V4
 import Database.Beam
 import Database.Beam.Sqlite
-import Hasql.Decoders as D
-import Hasql.Encoders as E
-import Hasql.Pool qualified
-import Hasql.Statement (Statement (..))
 import Relude
 import WikiMusic.Beam.Database
 import WikiMusic.Beam.User
@@ -91,9 +87,6 @@ invalidateToken env identifier = do
         UPDATE users SET password_reset_token = NULL,
         last_edited_at = $$2 WHERE identifier = $$1  
       |]
-
-fromHasqlUsageError :: Hasql.Pool.UsageError -> UserCommandError
-fromHasqlUsageError = PersistenceError . pack . Relude.show
 
 changePassword :: (MonadIO m) => Env -> UserPassword -> UUID -> m (Either UserCommandError ())
 changePassword env password identifier = do

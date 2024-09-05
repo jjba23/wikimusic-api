@@ -15,10 +15,6 @@ import Data.Map qualified as Map
 import Data.Text (pack)
 import Database.Beam
 import Database.Beam.Sqlite
-import Hasql.Decoders as D
-import Hasql.Encoders as E
-import Hasql.Pool qualified
-import Hasql.Statement (Statement (..))
 import Relude
 import WikiMusic.Beam.Database
 import WikiMusic.Beam.Relations
@@ -511,4 +507,3 @@ instance Exec SongCommand where
   execAlgebra (DeleteSongContents env identifiers next) = do
     stmtResult <- deleteStuffByUUID (env ^. #pool) "song_contents" "identifier" identifiers
     next $ first fromHasqlUsageError stmtResult
-

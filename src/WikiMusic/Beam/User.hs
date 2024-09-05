@@ -29,7 +29,7 @@ import WikiMusic.Model.Genre
 import WikiMusic.Protolude
 
 data UserT f = User'
-  { identifier :: C f UUID,
+  { identifier :: C f Text,
     displayName :: C f Text,
     emailAddress :: C f Text,
     passwordHash :: C f (Maybe Text),
@@ -48,7 +48,7 @@ makeFieldLabelsNoPrefix ''UserT
 type User' = UserT Identity
 
 instance Table UserT where
-  data PrimaryKey UserT f = UserId (Columnar f UUID) deriving (Generic, Beamable)
+  data PrimaryKey UserT f = UserId (Columnar f Text) deriving (Generic, Beamable)
   primaryKey = UserId . (^. #identifier)
 
 userTModification :: UserT (FieldModification (TableField UserT))
@@ -68,7 +68,7 @@ userTModification =
     }
 
 data UserRoleT f = UserRole'
-  { identifier :: C f UUID,
+  { identifier :: C f Text,
     userIdentifier :: PrimaryKey UserT f,
     roleId :: C f Text,
     createdAt :: C f UTCTime
@@ -80,7 +80,7 @@ makeFieldLabelsNoPrefix ''UserRoleT
 type UserRole' = UserRoleT Identity
 
 instance Table UserRoleT where
-  data PrimaryKey UserRoleT f = UserRoleId (Columnar f UUID) deriving (Generic, Beamable)
+  data PrimaryKey UserRoleT f = UserRoleId (Columnar f Text) deriving (Generic, Beamable)
   primaryKey = UserRoleId . (^. #identifier)
 
 userRoleTModification :: UserRoleT (FieldModification (TableField UserRoleT))

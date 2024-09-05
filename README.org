@@ -158,7 +158,7 @@ For local runs you can take a look at [[file:resources/config/run-local.toml]].
 Find below a list ideas and work being done on this project by all our contributors.
 
 ** Work in progress
-*** WIP Finish cleaning persistence layer by using only Beam for all queries (and no Hasql)
+*** WIP Finish cleaning persistence layer by using only Beam for all queries
 
 
 ** Project backlog
