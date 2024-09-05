@@ -16,10 +16,10 @@ import Data.UUID qualified as UUID
 import Database.Beam
 import Database.Beam.Sqlite
 import Relude
+import WikiMusic.Beam.Artist
 import WikiMusic.Beam.Database
 import WikiMusic.Beam.Relations
 import WikiMusic.Beam.Song
-import WikiMusic.Beam.Util
 import WikiMusic.Free.SongCommand
 import WikiMusic.Interaction.Model.Song
 import WikiMusic.Model.Artwork
@@ -27,7 +27,6 @@ import WikiMusic.Model.Comment
 import WikiMusic.Model.Opinion
 import WikiMusic.Model.Song
 import WikiMusic.Protolude
-import Prelude qualified
 
 insertArtistsOfSongs' :: (MonadIO m) => Env -> [ArtistOfSong] -> m (Map UUID ArtistOfSong)
 insertArtistsOfSongs' env items = do
@@ -316,21 +315,15 @@ updatedSongContent songContentDelta now x =
     SongContents'
 
 deleteArtistOfSong' :: (MonadIO m) => Env -> (UUID, UUID) -> m (Either SongCommandError ())
-deleteArtistOfSong' env identifiers = undefined
+deleteArtistOfSong' env (songId, artistId) = do
+  liftIO
+    . runBeamSqliteDebug putStrLn (env ^. #conn)
+    . runDelete
+    $ delete
+      ((^. #songArtists) wikiMusicDatabase)
+      (\c -> (c ^. #songIdentifier) ==. (val_ . SongId . UUID.toText $ songId) &&. (c ^. #artistIdentifier) ==. (val_ . ArtistId . UUID.toText $ artistId))
 
--- stmtResult <- hasqlTransaction (env ^. #pool) stmt identifiers
--- pure $ first fromHasqlUsageError stmtResult
--- where
---   query =
---     encodeUtf8
---       [trimming|
---   DELETE FROM song_artists WHERE song_identifier = $$1 AND artist_identifier = $$2
---   |]
---   encoder =
---     contrazip2
---       (E.param . E.nonNullable $ E.uuid)
---       (E.param . E.nonNullable $ E.uuid)
---   stmt = Statement query encoder D.noResult True
+  pure . Right $ ()
 
 newSongCommentFromRequest' :: (MonadIO m) => UUID -> InsertSongCommentsRequestItem -> m SongComment
 newSongCommentFromRequest' createdBy x = do
