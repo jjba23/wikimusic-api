@@ -1,0 +1,32 @@
+[servant]
+port = 50050
+host = "127.0.0.1"
+
+[sqlite]
+path = "/root/wikimusic.sqlite"
+run-migrations = true
+
+[cors]
+origins = [
+  "https://wikimusic.jointhefreeworld.org",
+  "https://www.wikimusic.jointhefreeworld.org",
+  "https://beta.wikimusic.jointhefreeworld.org",
+  "https://www.beta.wikimusic.jointhefreeworld.org",
+  "http://127.0.0.1:6923"
+]
+methods = [ "OPTIONS", "POST", "PUT", "DELETE", "PATCH", "GET" ]
+request-headers = [ "authorization", "content-type", "credentials", "x-wikimusic-auth", "access-control-allow-origin" ]
+
+[mail]
+send-timeout-seconds = 10
+host = "email-smtp.eu-west-3.amazonaws.com"
+user-file = "/run/secrets/amazon_ses_user"
+password-file = "/run/secrets/amazon_ses_password"
+sender-name = "[No Reply] WikiMusic 🎵"
+sender-mail = "noreply@wikimusic.jointhefreeworld.org"
+
+[web-frontend]
+base-url = "https://wikimusic.jointhefreeworld.org"
+
+[dev]
+reported-version = "production"

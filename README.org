@@ -1,0 +1,194 @@
+#+title: WikiMusic API
+
+API and Persistence layer to SQLite for WikiMusic, the invite-only private knowledge sharing of music community.
+
+/WikiMusic/
+
+#+begin_html
+<div>
+<img src="https://img.shields.io/badge/Haskell-5D4F85?logo=haskell&logoColor=fff&style=plastic" alt="Haskell"/>
+<img src="https://img.shields.io/badge/SQLite-4169E1?logo=sqlite&logoColor=fff&style=plastic" alt="SQLite"/>
+<img src="https://img.shields.io/badge/NixOS-5277C3?logo=nixos&logoColor=fff&style=plastic" alt="NixOS"/>
+<img src="https://img.shields.io/badge/GNU%20Emacs-7F5AB6?logo=gnuemacs&logoColor=fff&style=plastic" alt="GNU Emacs"/>
+</div>
+#+end_html
+
+
+WikiMusic as a software means an ingenious combination of a backend, a REST API, a database, and a user-interface to create a Content Management System (CMS) and a Gallery for music of all kinds, with educational intents.
+
+This is 100% free software, licensed under the GNU General Public License v3 or later.
+[[https://www.gnu.org/licenses/gpl-3.0.en.html][Refer to the full license, on GNU's website]]
+
+The WikiMusic project is an invite-only community, with the goal of knowledge sharing, and not for profit driven.
+
+[[https://www.buymeacoffee.com/jjbigorra][Please donate by clicking here]]. This helps us keep the underlying cloud infrastructure and Joe's work hours going strong.
+
+In this Git repository you will find the source code behind WikiMusic's backend.
+
+To see the living API spec of WikiMusic, also known as API definition, go to [[file:src/WikiMusic/Servant/ApiSpec.hs]]
+
+** Project structure
+
+~src/WikiMusic/~ harbours the Haskell code that makes the API work. Inside there you will find:
+- ~Console~ is a package with functionality related to logging to console / stdout.
+- ~Free~ is a package with free monadic definitions of the possible interactions with the WikiMusic system.
+- ~Interaction~ is a package with the implementation agnostic "business logic" of the WikiMusic system.
+- ~Model~ is a package with common data models to the entire system.
+- ~Persistence~ is a package with the Persistence implementation of several ~Command~ and ~Query~ interactions.
+- ~Smtp~ is a package that contains Smtp Mail related implementations.
+- ~Servant~ is a package that contains the API definition, routes and wiring of HTTP.
+- ~Boot.hs~ is the entry point to start this REST API.
+- ~Protolude.hs~ contains a custom tailor-made standard library (prelude) for WikiMusic, which helps developing.
+
+** Implementation details
+
+WikiMusic API is made using Haskell and free(er) monad techniques, along with great libraries made by the brilliant Haskell community. Some worthy mentions include servant, free-alacarte, wai, keuringsdienst, optics.
+
+Using free(er) monads means that we can describe the business logic of certain layers at a very high abstraction level, and we are free to interpret this logic as we see fit, depending on the use case. This helps testing, decoupling, and maintaining code.
+
+** Installing and running
+
+This Haskell project requires certain C / C++ libraries to run. Pay attention the the error messages at build time and install dependencies accordingly.
+
+We recommend running WikiMusic API with the Nix package manager, and even better with NixOS, since this project has a close integrations for NixOS machines.
+
+Otherwise, on systems like Void Linux :
+#+begin_src
+sudo xbps-install zlib zlib-devel ncurses-libtinfo-devel
+#+end_src
+
+You will also need a SQLite database to be accessible from WikiMusic API and running.
+
+WikiMusic will take care of the database schema migrations for you.
+
+There are also example docker compose files ready to be used at the ~resources~ folder for your convenience.
+
+* User permission
+
+In WikiMusic we have users of several kinds, with different privileges. See the table below for an understanding on what you can/cannot do depending on your rank.
+
+Demo user:
+
+| Resource | Create | Read | Update | Delete | Comment | Like/Dislike |
+|----------+--------+------+--------+--------+---------+--------------|
+| Song     | ❌     | ✅   | ❌     | ❌     | ✅      | ✅           |
+| Artist   | ❌     | ✅   | ❌     | ❌     | ✅      | ✅           |
+| Genre    | ❌     | ✅   | ❌     | ❌     | ✅      | ✅           |
+| User     | ❌     | ❌   | ❌     | ❌     | N/A     | N/A          |
+
+Low-rank user:
+
+| Resource | Create | Read | Update | Delete | Comment | Like/Dislike |
+|----------+--------+------+--------+--------+---------+--------------|
+| Song     | ✅     | ✅   | ✅     | ❌     | ✅      | ✅           |
+| Artist   | ✅     | ✅   | ✅     | ❌     | ✅      | ✅           |
+| Genre    | ✅     | ✅   | ✅     | ❌     | ✅      | ✅           |
+| User     | ❌     | ❌   | ❌     | ❌     | N/A     | N/A          |
+
+Maintainer user:
+
+| Resource | Create | Read | Update | Delete | Comment | Like/Dislike |
+|----------+--------+------+--------+--------+---------+--------------|
+| Song     | ✅     | ✅   | ✅     | ✅     | ✅      | ✅           |
+| Artist   | ✅     | ✅   | ✅     | ✅     | ✅      | ✅           |
+| Genre    | ✅     | ✅   | ✅     | ✅     | ✅      | ✅           |
+| User     | ✅     | ✅   | ✅     | ❌     | N/A     | N/A          |
+
+Super-user: can do everyting to the system!
+
+* NixOS
+
+Enter a nice shell provided by flakes, by doing ~nix develop~. You can also do ~nix build~ to build the project with Nix.
+
+Run the API with for example: ~nix run . -- "./resources/config/run-local.toml"~ .
+
+
+** Bare metal
+
+It can be needed, if you want to run bare metal without direnv, to do things like this sometimes in the ~cabal.project~ (find by ~find /nix -name "zlib.h*"~):
+
+#+begin_src nix
+package zlib
+    extra-include-dirs: /nix/store/686lhcz4bwg3wk09pi1xxjgzbxv7ys5q-zlib-1.3-dev/include
+    extra-lib-dirs: /nix/store/4rx3vkkd91wkbhpflsplfga603cp1l1c-zlib-1.3/lib
+#+end_src
+
+* API documentation
+
+When running WikiMusic API, you can navigate to ~<url where you serve it>/swagger.json~ to get the OpenAPI spec for WikiMusic.
+
+
+* Example config file
+
+For local runs you can take a look at [[file:resources/config/run-local.toml]].
+
+* Production environment diagram
+
+#+begin_src dot :file resources/images/production-env-diagram.png :exports results :mkdirp yes
+  digraph prodenv {
+  subgraph clusterA {
+  fontname="Inter,Helvetica,Arial,sans-serif"
+  node [ shape="box", fontname="Inter,Helvetica,Arial,sans-serif" ]
+  edge [ fontname="Inter,Helvetica,Arial,sans-serif", arrowhead="rnormal", arrowtail="dot" ]
+
+  I1 [ label="api.wikimusic.jointhefreeworld.org via HTTPS" ]
+  I2 [ label="AWS Cloudfront" ]
+  I3 [ label="AWS EC2 t3.small instance\nrunning NixOS" ]
+  I4 [ label="Haskell + Servant + SQLite" ]
+  I5 [ label="GitLab CI/CD" ]
+  I6 [ label="AWS SQS queue" ]
+
+
+  I1 -> I2;
+  I2 -> I3;
+  I3 -> I4;
+  I5 -> I6;
+  I3 -> I6;
+
+  }
+  }
+#+end_src
+
+#+RESULTS:
+[[file:resources/images/production-env-diagram.png]]
+
+
+* Project management
+
+Find below a list ideas and work being done on this project by all our contributors.
+
+** Work in progress
+*** WIP Finish cleaning persistence layer by using only Beam for all queries
+
+
+** Project backlog
+*** TODO Automated Cabal Hackage release in CI and version bumps
+*** TODO Recently viewed functionality
+*** TODO Add optional lyrics for song textfield
+*** TODO Clock and identifier generation as free monads, take things to a higher level
+*** TODO Create and optimize custom Prelude, and clean all files imports
+*** TODO Improve reusability in ~fromString . T.unpack $ x~
+*** TODO Liked items list view (liked songs, liked genres)
+
+*** TODO Create "for profit" version (premium offline pre-rendered) of WikiMusic, as app (read-only)
+*** TODO Ensure all data models are validated in requests
+*** TODO Use more non-empty types and sets if possible
+*** TODO Remove unused dependencies
+*** TODO Create black box tests for basic system functioning (with SQLite )
+****  Create SQLite assertion DSL for tests with Beam (check row exists)
+*** TODO Genre <> Song <> Artist relation
+*** TODO Drop SQL tables of user favourites, since opinions table will be used for it
+*** TODO Add forums 
+*** TODO Validate and limit size and type of files being uploaded
+**** TODO GP5 support (song file upload)
+*** TODO extract mail monad, service, templates and views into its own microservices, communicate via grpc if possible, otherwise REST and ensure retries and good logging
+*** TODO Prometheus metrics and visualizations, use Grafana in Docker, also in production server
+*** TODO wikimusic marketing emails, asking for donation, recommending last added and last edited top 10 items
+*** TODO WikiMusic email about new website and its changelog, every commit automatic mail users?, new capabilities to all users marketing
+
+
+** Done
+*** DONE Migration to GitHub
+CLOSED: [2024-09-04 wo 22:05]
+*** DONE fix email, do not expose Smtp credentials on GitHub
+CLOSED: [2024-09-04 wo 17:23]
