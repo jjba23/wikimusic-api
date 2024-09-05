@@ -22,15 +22,17 @@ readSecrets :: (MonadIO m) => AppConfig -> m AppConfig
 readSecrets cfg = do
   mailPassword <- readSecretFromFile cfg (^. #mail % #passwordFile)
   mailUser <- readSecretFromFile cfg (^. #mail % #userFile)
-  let withMailPasswordCfg =
+  let mailConfig = cfg ^. #mail
+  let finalCfg =
         cfg
-          & #mail
-          .~ ((cfg ^. #mail) & #password ?~ mailPassword)
+          { mail =
+              mailConfig
+                { password = Just mailPassword,
+                  user = Just mailUser
+                }
+          }
 
-  pure
-    $ withMailPasswordCfg
-    & #mail
-    .~ ((cfg ^. #mail) & #user ?~ mailUser)
+  pure finalCfg
 
 readSecretFromFile :: (MonadIO m) => t -> (t -> Text) -> m Text
 readSecretFromFile cfg getFilePath = do
