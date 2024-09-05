@@ -2,18 +2,9 @@
 port = 50050
 host = "127.0.0.1"
 
-[postgresql]
-user = "wikimusic_admin"
-password-file = "/run/secrets/wikimusic_postgres_key"
-port = 55432
-name = "wikimusic_database"
-pool-size = 30
-host = "localhost"
+[sqlite]
+path = "/root/wikimusic.sqlite"
 run-migrations = true
-
-[redis]
-port = 63379
-password-file = "/run/secrets/wikimusic_redis_key"
 
 [cors]
 origins = [

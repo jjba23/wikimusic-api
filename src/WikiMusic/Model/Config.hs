@@ -21,53 +21,18 @@ import Relude
 import Toml
 
 data SqliteConfig = SqliteConfig
-  { user :: Text,
-    passwordFile :: Text,
-    password :: Maybe Text,
-    port :: Int,
-    name :: Text,
-    
-    host :: Text,
-    
+  { path :: Text,
+    runMigrations :: Bool
   }
   deriving (Generic, Eq, Show)
 
-postgreSQLConfigCodec :: TomlCodec SqliteConfig
-postgreSQLConfigCodec =
+sqliteConfigCodec :: TomlCodec SqliteConfig
+sqliteConfigCodec =
   SqliteConfig
-    <$> Toml.text "user"
-    .= (^. #user)
-    <*> Toml.text "password-file"
-    .= (^. #passwordFile)
-    <*> Toml.dioptional (Toml.text "password")
-    .= (^. #password)
-    <*> Toml.int "port"
-    .= (^. #port)
-    <*> Toml.text "name"
-    .= (^. #name)
-    <*> Toml.int "pool-size"
-    .= (^. #poolSize)
-    <*> Toml.text "host"
-    .= (^. #host)
+    <$> Toml.text "path"
+    .= (^. #path)
     <*> Toml.bool "run-migrations"
     .= (^. #runMigrations)
-
-data RedisConfig = RedisConfig
-  { port :: Int,
-    passwordFile :: Text,
-    password :: Maybe Text
-  }
-  deriving (Generic, Eq, Show)
-
-redisConfigCodec :: TomlCodec RedisConfig
-redisConfigCodec =
-  RedisConfig
-    <$> Toml.int "port"
-    .= (^. #port)
-    <*> Toml.text "password-file"
-    .= (^. #passwordFile)
-    <*> Toml.dioptional (Toml.text "password")
-    .= (^. #password)
 
 data ServantConfig = ServantConfig
   { port :: Int,
@@ -153,8 +118,7 @@ devCodec = DevConfig <$> Toml.text "reported-version" .= (^. #reportedVersion)
 
 data AppConfig = AppConfig
   { servant :: ServantConfig,
-    postgresql :: SqliteConfig,
-    redis :: RedisConfig,
+    sqlite :: SqliteConfig,
     cors :: CorsConfig,
     mail :: MailConfig,
     webFrontend :: WebFrontendConfig,
@@ -167,7 +131,7 @@ appConfigCodec =
   AppConfig
     <$> Toml.table servantConfigCodec "servant"
     .= (^. #servant)
-    <*> Toml.table postgreSQLConfigCodec "postgresql"
+    <*> Toml.table sqliteConfigCodec "sqlite"
     .= (^. #postgresql)
     <*> Toml.table redisConfigCodec "redis"
     .= (^. #redis)

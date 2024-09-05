@@ -73,26 +73,15 @@ myCors cfg = cors (const $ Just policy)
           corsIgnoreFailures = False
         }
 
-mkApp :: ApacheLogger -> AppConfig -> IO Application
+mkApp :: (MonadIO m) => ApacheLogger -> AppConfig -> m Application
 mkApp logger' cfg pool redisConn = do
-  now <- getCurrentTime
-  conn <-
-    liftIO
-      $ connect
-        defaultConnectInfo
-          { connectHost = T.unpack $ cfg ^. #postgresql % #host,
-            connectPort = fromIntegral $ cfg ^. #postgresql % #port,
-            connectUser = T.unpack $ cfg ^. #postgresql % #user,
-            connectPassword = T.unpack $ fromMaybe "" (cfg ^. #postgresql % #password),
-            connectDatabase = T.unpack $ cfg ^. #postgresql % #name
-          }
-
+  now <- liftIO getCurrentTime
+  conn <- liftIO $ open (cfg ^. #sqlite ^. #path)
   mailCss <- liftIO $ readFileBS "resources/css/mail.css"
 
   let env =
         Env
-          { 
-            cfg = cfg,
+          { cfg = cfg,
             processStartedAt = now,
             logger = logger',
             conn = conn,

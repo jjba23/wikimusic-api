@@ -85,7 +85,7 @@ library
       WikiMusic.Console.Logger
 
       -- λ mail
-      WikiMusic.SMTP.MailCommandSES
+      WikiMusic.Smtp.MailCommandSES
 
       -- λ custom prelude
       WikiMusic.Protolude

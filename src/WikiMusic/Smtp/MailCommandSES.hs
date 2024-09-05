@@ -5,11 +5,11 @@
 {-# LANGUAGE NoFieldSelectors #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
-module WikiMusic.SMTP.MailCommandSES () where
+module WikiMusic.Smtp.MailCommandSES () where
 
 import Data.Text qualified as T
 import Network.Mail.Mime hiding (simpleMail)
-import Network.Mail.SMTP hiding (htmlPart)
+import Network.Mail.Smtp hiding (htmlPart)
 import Optics
 import Relude
 import System.Timeout

@@ -8,9 +8,8 @@ API and Persistence layer to SQLite for WikiMusic, the invite-only private knowl
 <div>
 <img src="https://img.shields.io/badge/Haskell-5D4F85?logo=haskell&logoColor=fff&style=plastic" alt="Haskell"/>
 <img src="https://img.shields.io/badge/SQLite-4169E1?logo=postgresql&logoColor=fff&style=plastic" alt="SQLite"/>
-<img src="https://img.shields.io/badge/GNU%20Emacs-7F5AB6?logo=gnuemacs&logoColor=fff&style=plastic" alt="GNU Emacs"/>
 <img src="https://img.shields.io/badge/NixOS-5277C3?logo=nixos&logoColor=fff&style=plastic" alt="NixOS"/>
-<img src="https://img.shields.io/badge/Redis-DC382D?logo=redis&logoColor=fff&style=plastic" alt="Redis"/>
+<img src="https://img.shields.io/badge/GNU%20Emacs-7F5AB6?logo=gnuemacs&logoColor=fff&style=plastic" alt="GNU Emacs"/>
 </div>
 #+end_html
 
@@ -36,7 +35,7 @@ To see the living API spec of WikiMusic, also known as API definition, go to [[f
 - ~Interaction~ is a package with the implementation agnostic "business logic" of the WikiMusic system.
 - ~Model~ is a package with common data models to the entire system.
 - ~Persistence~ is a package with the Persistence implementation of several ~Command~ and ~Query~ interactions.
-- ~SMTP~ is a package that contains SMTP Mail related implementations.
+- ~Smtp~ is a package that contains Smtp Mail related implementations.
 - ~Servant~ is a package that contains the API definition, routes and wiring of HTTP.
 - ~Boot.hs~ is the entry point to start this REST API.
 - ~Protolude.hs~ contains a custom tailor-made standard library (prelude) for WikiMusic, which helps developing.
@@ -187,11 +186,12 @@ Find below a list ideas and work being done on this project by all our contribut
 **** TODO GP5 support (song file upload)
 *** TODO extract mail monad, service, templates and views into its own microservices, communicate via grpc if possible, otherwise REST and ensure retries and good logging
 *** TODO Prometheus metrics and visualizations, use Grafana in Docker, also in production server
-*** TODO wikimusic marketing emails, asking for donation, recommending last added and last edited top 10 items 
+*** TODO wikimusic marketing emails, asking for donation, recommending last added and last edited top 10 items
+*** TODO WikiMusic email about new website and its changelog, every commit automatic mail users?, new capabilities to all users marketing
 
 
 ** Done
 *** DONE Migration to GitHub
 CLOSED: [2024-09-04 wo 22:05]
-*** DONE fix email, do not expose SMTP credentials on GitHub
+*** DONE fix email, do not expose Smtp credentials on GitHub
 CLOSED: [2024-09-04 wo 17:23]

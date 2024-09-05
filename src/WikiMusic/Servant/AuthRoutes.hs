@@ -12,9 +12,9 @@ import WikiMusic.Free.AuthQuery
 import WikiMusic.Interaction.Auth
 import WikiMusic.Interaction.Model.Auth
 import WikiMusic.Model.Env
-import WikiMusic.Sqlite.AuthQuery ()
 import WikiMusic.Protolude
 import WikiMusic.Servant.Utilities
+import WikiMusic.Sqlite.AuthQuery ()
 
 fetchMeRoute :: Env -> Maybe Text -> Handler GetMeQueryResponse
 fetchMeRoute env authToken = do

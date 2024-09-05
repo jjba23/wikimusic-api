@@ -37,9 +37,8 @@ boot = liftIO $ withStdoutLogger $ \logger' ->
       _ -> "resources/config/run-local.toml"
 
 startWikiMusicAPI :: (MonadIO m) => ApacheLogger -> AppConfig -> Hasql.Pool.Pool -> Redis.Connection -> m ()
-startWikiMusicAPI logger' cfg pool redisConn = do  
+startWikiMusicAPI logger' cfg pool redisConn = do
   liftIO . BL.putStr $ "Starting REST API ..."
   liftIO $ runSettings apiSettings =<< mkApp logger' cfg
   where
     apiSettings = setPort (cfg ^. #servant % #port) defaultSettings
-

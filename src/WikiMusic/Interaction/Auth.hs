@@ -10,8 +10,8 @@ where
 
 import WikiMusic.Free.AuthQuery
 import WikiMusic.Interaction.Model.Auth
-import WikiMusic.Sqlite.AuthQuery ()
 import WikiMusic.Protolude
+import WikiMusic.Sqlite.AuthQuery ()
 
 fetchMeAction :: (AuthQuery :<: f) => Env -> UUID -> Free f (Maybe GetMeQueryResponse)
 fetchMeAction env identifier = do

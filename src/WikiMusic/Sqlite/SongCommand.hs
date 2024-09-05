@@ -511,4 +511,3 @@ instance Exec SongCommand where
   execAlgebra (DeleteSongContents env identifiers next) = do
     stmtResult <- deleteStuffByUUID (env ^. #pool) "song_contents" "identifier" identifiers
     next $ first fromHasqlUsageError stmtResult
-

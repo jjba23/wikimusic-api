@@ -32,10 +32,10 @@ import WikiMusic.Interaction.Model.Song
 import WikiMusic.Interaction.Song
 import WikiMusic.Model.Env
 import WikiMusic.Model.Other
-import WikiMusic.Sqlite.SongCommand ()
-import WikiMusic.Sqlite.SongQuery ()
 import WikiMusic.Protolude
 import WikiMusic.Servant.Utilities
+import WikiMusic.Sqlite.SongCommand ()
+import WikiMusic.Sqlite.SongQuery ()
 
 fetchSongsRoute :: Env -> Maybe Text -> Maybe Int -> Maybe Int -> Maybe Text -> Maybe Text -> Handler GetSongsQueryResponse
 fetchSongsRoute env authToken limit offset sort' include =

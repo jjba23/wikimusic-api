@@ -1,3 +1,4 @@
+
 CREATE TABLE artist_artworks (
   identifier TEXT NOT NULL PRIMARY KEY, 
   artist_identifier TEXT NOT NULL, 
@@ -13,6 +14,7 @@ CREATE TABLE artist_artworks (
   FOREIGN KEY (created_by) REFERENCES users (identifier), 
   FOREIGN KEY (approved_by) REFERENCES users (identifier)
 );
+
 CREATE TABLE artist_comments (
   identifier TEXT NOT NULL PRIMARY KEY, 
   parent_identifier TEXT, 
@@ -27,6 +29,7 @@ CREATE TABLE artist_comments (
   FOREIGN KEY (created_by) REFERENCES users (identifier), 
   FOREIGN KEY (approved_by) REFERENCES users (identifier)
 );
+
 CREATE TABLE artist_external_sources (
   identifier TEXT NOT NULL PRIMARY KEY, 
   artist_identifier TEXT NOT NULL, 
@@ -40,6 +43,7 @@ CREATE TABLE artist_external_sources (
   FOREIGN KEY (artist_identifier) REFERENCES artists (identifier), 
   FOREIGN KEY (created_by) REFERENCES users (identifier)
 );
+
 CREATE TABLE artist_genres (
   identifier TEXT NOT NULL PRIMARY KEY, 
   artist_identifier TEXT NOT NULL, 
@@ -49,6 +53,7 @@ CREATE TABLE artist_genres (
   FOREIGN KEY (artist_identifier) REFERENCES artists (identifier), 
   FOREIGN KEY (genre_identifier) REFERENCES genres (identifier)
 );
+
 CREATE TABLE artist_opinions (
   identifier TEXT NOT NULL PRIMARY KEY, 
   artist_identifier TEXT NOT NULL, 
@@ -60,6 +65,7 @@ CREATE TABLE artist_opinions (
   FOREIGN KEY (artist_identifier) REFERENCES artists (identifier), 
   FOREIGN KEY (created_by) REFERENCES users (identifier)
 );
+
 CREATE TABLE artists (
   identifier TEXT NOT NULL PRIMARY KEY, 
   display_name TEXT NOT NULL, 
@@ -73,6 +79,7 @@ CREATE TABLE artists (
   FOREIGN KEY (created_by) REFERENCES users (identifier), 
   FOREIGN KEY (approved_by) REFERENCES users (identifier)
 );
+
 CREATE TABLE genre_artworks (
   identifier TEXT NOT NULL PRIMARY KEY, 
   genre_identifier TEXT NOT NULL, 
@@ -88,6 +95,7 @@ CREATE TABLE genre_artworks (
   FOREIGN KEY (approved_by) REFERENCES users (identifier), 
   FOREIGN KEY (genre_identifier) REFERENCES genres (identifier)
 );
+
 CREATE TABLE genre_comments (
   identifier TEXT NOT NULL PRIMARY KEY, 
   parent_identifier TEXT, 
@@ -102,6 +110,7 @@ CREATE TABLE genre_comments (
   FOREIGN KEY (approved_by) REFERENCES users (identifier), 
   FOREIGN KEY (genre_identifier) REFERENCES genres (identifier)
 );
+
 CREATE TABLE genre_external_sources (
   identifier TEXT NOT NULL PRIMARY KEY, 
   genre_identifier TEXT NOT NULL, 
@@ -115,6 +124,7 @@ CREATE TABLE genre_external_sources (
   FOREIGN KEY (created_by) REFERENCES users (identifier), 
   FOREIGN KEY (genre_identifier) REFERENCES genres (identifier)
 );
+
 CREATE TABLE genre_opinions (
   identifier TEXT NOT NULL PRIMARY KEY, 
   genre_identifier TEXT NOT NULL, 
@@ -140,6 +150,7 @@ CREATE TABLE genres (
   FOREIGN KEY (created_by) REFERENCES users (identifier), 
   FOREIGN KEY (approved_by) REFERENCES users (identifier)
 );
+
 CREATE TABLE song_artists (
   identifier TEXT NOT NULL PRIMARY KEY, 
   song_identifier TEXT NOT NULL, 
@@ -150,6 +161,7 @@ CREATE TABLE song_artists (
   FOREIGN KEY (artist_identifier) REFERENCES artists (identifier), 
   FOREIGN KEY (song_identifier) REFERENCES songs (identifier)
 );
+
 CREATE TABLE song_artworks (
   identifier TEXT NOT NULL PRIMARY KEY, 
   song_identifier TEXT NOT NULL, 
@@ -165,6 +177,7 @@ CREATE TABLE song_artworks (
   FOREIGN KEY (approved_by) REFERENCES users (identifier), 
   FOREIGN KEY (song_identifier) REFERENCES songs (identifier)
 );
+
 CREATE TABLE song_comments (
   identifier TEXT NOT NULL PRIMARY KEY, 
   parent_identifier TEXT, 
@@ -179,6 +192,7 @@ CREATE TABLE song_comments (
   FOREIGN KEY (approved_by) REFERENCES users (identifier), 
   FOREIGN KEY (song_identifier) REFERENCES songs (identifier)
 );
+
 CREATE TABLE song_contents (
   identifier TEXT NOT NULL PRIMARY KEY, 
   song_identifier TEXT NOT NULL, 
@@ -197,6 +211,7 @@ CREATE TABLE song_contents (
   FOREIGN KEY (approved_by) REFERENCES users (identifier), 
   FOREIGN KEY (song_identifier) REFERENCES songs (identifier)
 );
+
 CREATE TABLE song_external_sources (
   identifier TEXT NOT NULL PRIMARY KEY, 
   song_identifier TEXT NOT NULL, 
@@ -210,6 +225,7 @@ CREATE TABLE song_external_sources (
   FOREIGN KEY (created_by) REFERENCES users (identifier), 
   FOREIGN KEY (song_identifier) REFERENCES songs (identifier)
 );
+
 CREATE TABLE song_genres (
   identifier TEXT NOT NULL PRIMARY KEY, 
   song_identifier TEXT NOT NULL, 
@@ -220,6 +236,7 @@ CREATE TABLE song_genres (
   FOREIGN KEY (genre_identifier) REFERENCES genres (identifier), 
   FOREIGN KEY (song_identifier) REFERENCES songs (identifier)
 );
+
 CREATE TABLE song_opinions (
   identifier TEXT NOT NULL PRIMARY KEY, 
   song_identifier TEXT NOT NULL, 
@@ -231,6 +248,7 @@ CREATE TABLE song_opinions (
   FOREIGN KEY (created_by) REFERENCES users (identifier), 
   FOREIGN KEY (song_identifier) REFERENCES songs (identifier)
 );
+
 CREATE TABLE songs (
   identifier TEXT NOT NULL PRIMARY KEY, 
   display_name TEXT NOT NULL, 
@@ -249,6 +267,7 @@ CREATE TABLE songs (
   FOREIGN KEY (created_by) REFERENCES users (identifier), 
   FOREIGN KEY (approved_by) REFERENCES users (identifier)
 );
+
 CREATE TABLE user_roles (
   identifier TEXT NOT NULL PRIMARY KEY, 
   user_identifier TEXT NOT NULL, 
@@ -256,6 +275,7 @@ CREATE TABLE user_roles (
   created_at TEXT NOT NULL, 
   FOREIGN KEY (user_identifier) REFERENCES users (identifier)
   );
+  
 CREATE TABLE users (
   identifier TEXT NOT NULL PRIMARY KEY, 
   display_name TEXT NOT NULL, email_address TEXT NOT NULL, 

@@ -1,2 +1,0 @@
-ALTER TABLE users
-ALTER COLUMN auth_token TYPE VARCHAR(1024);

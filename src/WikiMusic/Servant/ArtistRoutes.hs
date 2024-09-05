@@ -24,10 +24,10 @@ import WikiMusic.Free.ArtistQuery
 import WikiMusic.Interaction.Artist
 import WikiMusic.Interaction.Model.Artist
 import WikiMusic.Model.Other
-import WikiMusic.Sqlite.ArtistCommand ()
-import WikiMusic.Sqlite.ArtistQuery ()
 import WikiMusic.Protolude
 import WikiMusic.Servant.Utilities
+import WikiMusic.Sqlite.ArtistCommand ()
+import WikiMusic.Sqlite.ArtistQuery ()
 
 fetchArtistsRoute :: Env -> Maybe Text -> Maybe Int -> Maybe Int -> Maybe Text -> Maybe Text -> Handler GetArtistsQueryResponse
 fetchArtistsRoute env authToken limit offset sort' include =

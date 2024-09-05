@@ -20,8 +20,8 @@ import WikiMusic.Free.AuthQuery
 import WikiMusic.Model.Auth
 import WikiMusic.Model.Env
 import WikiMusic.Model.Other
-import WikiMusic.Sqlite.AuthQuery ()
 import WikiMusic.Protolude
+import WikiMusic.Sqlite.AuthQuery ()
 
 loginRoute ::
   Env ->

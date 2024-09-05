@@ -358,4 +358,3 @@ instance Exec GenreCommand where
     next =<< newGenreOpinionFromRequest' createdBy req
   execAlgebra (NewGenreArtworkFromRequest createdBy req next) =
     next =<< newGenreArtworkFromRequest' createdBy req
-

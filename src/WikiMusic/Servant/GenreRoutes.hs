@@ -24,10 +24,10 @@ import WikiMusic.Free.GenreQuery
 import WikiMusic.Interaction.Genre
 import WikiMusic.Interaction.Model.Genre
 import WikiMusic.Model.Other
-import WikiMusic.Sqlite.GenreCommand ()
-import WikiMusic.Sqlite.GenreQuery ()
 import WikiMusic.Protolude
 import WikiMusic.Servant.Utilities
+import WikiMusic.Sqlite.GenreCommand ()
+import WikiMusic.Sqlite.GenreQuery ()
 
 fetchGenresRoute :: Env -> Maybe Text -> Maybe Int -> Maybe Int -> Maybe Text -> Maybe Text -> Handler GetGenresQueryResponse
 fetchGenresRoute env authToken limit offset sort' include =

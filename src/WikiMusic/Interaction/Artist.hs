@@ -25,9 +25,9 @@ import WikiMusic.Free.ArtistQuery
 import WikiMusic.Interaction.Model.Artist
 import WikiMusic.Model.Artist
 import WikiMusic.Model.Other
+import WikiMusic.Protolude
 import WikiMusic.Sqlite.ArtistCommand ()
 import WikiMusic.Sqlite.ArtistQuery ()
-import WikiMusic.Protolude
 
 fetchArtistsAction ::
   (ArtistQuery :<: f, ArtistCommand :<: f) =>
