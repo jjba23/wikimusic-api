@@ -26,10 +26,10 @@ textToUUID = Unsafe.fromJust . UUID.fromText
 
 fromPersistenceArtwork x =
   Artwork
-    { identifier = x ^. #identifier,
-      createdBy = x ^. #createdBy,
+    { identifier = textToUUID $ x ^. #identifier,
+      createdBy = textToUUID $ x ^. #createdBy,
       visibilityStatus = fromIntegral $ x ^. #visibilityStatus,
-      approvedBy = x ^. #approvedBy,
+      approvedBy = fmap textToUUID $ x ^. #approvedBy,
       contentUrl = x ^. #contentUrl,
       contentCaption = x ^. #contentCaption,
       orderValue = fromIntegral $ x ^. #orderValue,
@@ -39,20 +39,20 @@ fromPersistenceArtwork x =
 
 fromPersistenceComment x =
   Comment
-    { identifier = x ^. #identifier,
-      parentIdentifier = x ^. #parentIdentifier,
-      createdBy = x ^. #createdBy,
+    { identifier = textToUUID $ x ^. #identifier,
+      parentIdentifier = fmap textToUUID $ x ^. #parentIdentifier,
+      createdBy = textToUUID $ x ^. #createdBy,
       visibilityStatus = fromIntegral $ x ^. #visibilityStatus,
       contents = x ^. #contents,
-      approvedBy = x ^. #approvedBy,
+      approvedBy = fmap textToUUID $ x ^. #approvedBy,
       createdAt = x ^. #createdAt,
       lastEditedAt = x ^. #lastEditedAt
     }
 
 fromPersistenceOpinion x =
   Opinion
-    { identifier = x ^. #identifier,
-      createdBy = x ^. #createdBy,
+    { identifier = textToUUID $ x ^. #identifier,
+      createdBy = textToUUID $ x ^. #createdBy,
       isLike = x ^. #isLike,
       isDislike = x ^. #isDislike,
       createdAt = x ^. #createdAt,

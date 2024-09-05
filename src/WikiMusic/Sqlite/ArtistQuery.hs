@@ -13,6 +13,7 @@ module WikiMusic.Sqlite.ArtistQuery () where
 
 import Data.Map (elems, keys)
 import Data.Map qualified as Map
+import Data.UUID qualified as UUID
 import Database.Beam
 import Database.Beam.Sqlite
 import WikiMusic.Beam.Artist
@@ -67,7 +68,7 @@ fetchArtistsByUUID' env sortOrder identifiers = do
       . runBeamSqliteDebug putStrLn (env ^. #conn)
       . runSelectReturningList
       . select
-      . filter_ (\s -> (s ^. #identifier) `in_` map val_ identifiers)
+      . filter_ (\s -> (s ^. #identifier) `in_` map (val_ . UUID.toText) identifiers)
       . mkOrderBy sortOrder
       $ all_ ((^. #artists) wikiMusicDatabase)
   filledArtists env artists
@@ -82,7 +83,7 @@ fetchArtistArtworks' env identifiers = do
     . orderBy_ (asc_ . (^. #orderValue))
     $ do
       songs <-
-        filter_ (\s -> (s ^. #identifier) `in_` map val_ identifiers)
+        filter_ (\s -> (s ^. #identifier) `in_` map (val_ . UUID.toText) identifiers)
           $ all_ ((^. #artists) wikiMusicDatabase)
       oneToMany_ ((^. #artistArtworks) wikiMusicDatabase) (^. #artistIdentifier) songs
   pure . Map.fromList . map toArtistArtwork $ artworks
@@ -133,7 +134,7 @@ fetchArtistComments' env identifiers = do
   comments <- liftIO $ runBeamSqliteDebug putStrLn (env ^. #conn) $ do
     runSelectReturningList $ select $ do
       artists <-
-        filter_ (\s -> (s ^. #identifier) `in_` map val_ identifiers)
+        filter_ (\s -> (s ^. #identifier) `in_` map (val_ . UUID.toText) identifiers)
           $ all_ ((^. #artists) wikiMusicDatabase)
       oneToMany_ ((^. #artistComments) wikiMusicDatabase) (^. #artistIdentifier) artists
 
@@ -146,7 +147,7 @@ searchArtists' env searchInput sortOrder (Limit limit) (Offset offset) = do
       . runBeamSqliteDebug putStrLn (env ^. #conn)
       . runSelectReturningList
       . select
-      . filter_ (\s -> (s ^. #displayName) `ilike_` val_ ("%" <> searchInput ^. #value <> "%"))
+      . filter_ (\s -> (s ^. #displayName) `like_` val_ ("%" <> searchInput ^. #value <> "%"))
       . offset_ (fromIntegral offset)
       . limit_ (fromIntegral limit)
       . mkOrderBy sortOrder
@@ -159,7 +160,7 @@ fetchArtistOpinions' env identifiers = do
   opinions <- liftIO $ runBeamSqliteDebug putStrLn (env ^. #conn) $ do
     runSelectReturningList $ select $ do
       artists <-
-        filter_ (\s -> (s ^. #identifier) `in_` map val_ identifiers)
+        filter_ (\s -> (s ^. #identifier) `in_` map (val_ . UUID.toText) identifiers)
           $ all_ ((^. #artists) wikiMusicDatabase)
       oneToMany_ ((^. #artistOpinions) wikiMusicDatabase) (^. #artistIdentifier) artists
 
@@ -173,7 +174,7 @@ filledArtists env artists = do
       . filter_ (\s -> (s ^. #artistIdentifier) `in_` map (val_ . (\x -> ArtistId $ x ^. #identifier)) artists)
       $ all_ ((^. #artistExternalSources) wikiMusicDatabase)
   let filledArtists' = map (withExternalSources externalSources) artists
-  pure (Map.fromList filledArtists', map (^. #identifier) artists)
+  pure (Map.fromList filledArtists', map (textToUUID . (^. #identifier)) artists)
   where
     withExternalSources externalSources artist =
       let maybeFoundExternal =

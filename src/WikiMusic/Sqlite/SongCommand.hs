@@ -12,13 +12,14 @@
 module WikiMusic.Sqlite.SongCommand () where
 
 import Data.Map qualified as Map
-import Data.Text (pack)
+import Data.UUID qualified as UUID
 import Database.Beam
 import Database.Beam.Sqlite
 import Relude
 import WikiMusic.Beam.Database
 import WikiMusic.Beam.Relations
 import WikiMusic.Beam.Song
+import WikiMusic.Beam.Util
 import WikiMusic.Free.SongCommand
 import WikiMusic.Interaction.Model.Song
 import WikiMusic.Model.Artwork
@@ -95,9 +96,9 @@ upsertSongOpinions' env opinions = do
             filter_
               ( \s ->
                   (s ^. #songIdentifier)
-                    ==. val_ (SongId $ o ^. #songIdentifier)
+                    ==. val_ (SongId $ UUID.toText $ o ^. #songIdentifier)
                     &&. (s ^. #createdBy)
-                    ==. val_ (o ^. #opinion % #createdBy)
+                    ==. val_ (UUID.toText $ o ^. #opinion % #createdBy)
               )
               $ all_ ((^. #songOpinions) wikiMusicDatabase)
         case exOpinion of
@@ -132,17 +133,19 @@ uberDeleteSongs' env identifiers = do
   deleteOpinionsOfSongsResult <- liftIO . exec @SongCommand $ deleteOpinionsOfSongs env identifiers
   deleteCommentsOfSongsResult <- liftIO . exec @SongCommand $ deleteCommentsOfSongs env identifiers
   deleteSongExternalSourcesResult <- liftIO . exec @SongCommand $ deleteSongExternalSources env identifiers
-  deleteSongsResult <- deleteStuffByUUID (env ^. #pool) "songs" "identifier" identifiers
+  deleteSongsResult <- liftIO . exec @SongCommand $ deleteSongs env identifiers
   deleteArtistsOfSongResult <- liftIO . exec @SongCommand $ deleteArtistsOfSongs env identifiers
   deleteContentsOfSongResult <- liftIO . exec @SongCommand $ deleteContentsOfSongs env identifiers
-  pure
-    $ deleteArtworksOfSongsResult
-    <> deleteOpinionsOfSongsResult
-    <> deleteSongExternalSourcesResult
-    <> deleteCommentsOfSongsResult
-    <> deleteArtistsOfSongResult
-    <> deleteContentsOfSongResult
-    <> first fromHasqlUsageError deleteSongsResult
+  pure . Right $ ()
+
+-- pure
+--   $ deleteArtworksOfSongsResult
+--   <> deleteOpinionsOfSongsResult
+--   <> deleteSongExternalSourcesResult
+--   <> deleteCommentsOfSongsResult
+--   <> deleteArtistsOfSongResult
+--   <> deleteContentsOfSongResult
+--   <> first fromHasqlUsageError deleteSongsResult
 
 updateSongArtworkOrder' :: (MonadIO m) => Env -> [SongArtworkOrderUpdate] -> m (Either a ())
 updateSongArtworkOrder' env orderUpdates = do
@@ -151,7 +154,7 @@ updateSongArtworkOrder' env orderUpdates = do
         art <- liftIO $ runBeamSqliteDebug putStrLn (env ^. #conn) $ do
           runSelectReturningOne $ select $ do
             filter_
-              (\s -> (s ^. #identifier) ==. val_ (ou ^. #identifier))
+              (\s -> (s ^. #identifier) ==. val_ (UUID.toText $ ou ^. #identifier))
               $ all_ ((^. #songArtworks) wikiMusicDatabase)
         case art of
           Nothing -> pure ()
@@ -198,7 +201,7 @@ updateSongExternalSources' env deltas = do
         ex <- liftIO $ runBeamSqliteDebug putStrLn (env ^. #conn) $ do
           runSelectReturningOne $ select $ do
             filter_
-              (\s -> (s ^. #songIdentifier) ==. val_ (SongId $ song ^. #identifier))
+              (\s -> (s ^. #songIdentifier) ==. val_ (SongId $ UUID.toText $ song ^. #identifier))
               $ all_ ((^. #songExternalSources) wikiMusicDatabase)
         case ex of
           Nothing -> pure ()
@@ -263,7 +266,7 @@ updateSongContents' env songContentDeltas = do
       . runBeamSqliteDebug putStrLn (env ^. #conn)
       . runSelectReturningList
       . select
-      . filter_ (\s -> (s ^. #identifier) `in_` map (val_ . (\z -> z ^. #identifier)) songContentDeltas)
+      . filter_ (\s -> (s ^. #identifier) `in_` map (val_ . (\z -> UUID.toText $ z ^. #identifier)) songContentDeltas)
       $ all_ ((^. #songContents) wikiMusicDatabase)
   _ <- liftIO . putStrLn . Relude.show $ songContentDeltas
   now <- liftIO getCurrentTime
@@ -276,8 +279,7 @@ updateSongContents' env songContentDeltas = do
                   ( \songContentP ->
                       songContentP
                         ^. #identifier
-                        == songContentDelta
-                        ^. #identifier
+                        == (UUID.toText $ songContentDelta ^. #identifier)
                   )
                   songContentsP
           )
@@ -305,20 +307,21 @@ updatedSongContent songContentDelta now x =
     SongContents'
 
 deleteArtistOfSong' :: (MonadIO m) => Env -> (UUID, UUID) -> m (Either SongCommandError ())
-deleteArtistOfSong' env identifiers = do
-  stmtResult <- hasqlTransaction (env ^. #pool) stmt identifiers
-  pure $ first fromHasqlUsageError stmtResult
-  where
-    query =
-      encodeUtf8
-        [trimming|
-    DELETE FROM song_artists WHERE song_identifier = $$1 AND artist_identifier = $$2
-    |]
-    encoder =
-      contrazip2
-        (E.param . E.nonNullable $ E.uuid)
-        (E.param . E.nonNullable $ E.uuid)
-    stmt = Statement query encoder D.noResult True
+deleteArtistOfSong' env identifiers = undefined
+
+-- stmtResult <- hasqlTransaction (env ^. #pool) stmt identifiers
+-- pure $ first fromHasqlUsageError stmtResult
+-- where
+--   query =
+--     encodeUtf8
+--       [trimming|
+--   DELETE FROM song_artists WHERE song_identifier = $$1 AND artist_identifier = $$2
+--   |]
+--   encoder =
+--     contrazip2
+--       (E.param . E.nonNullable $ E.uuid)
+--       (E.param . E.nonNullable $ E.uuid)
+--   stmt = Statement query encoder D.noResult True
 
 newSongCommentFromRequest' :: (MonadIO m) => UUID -> InsertSongCommentsRequestItem -> m SongComment
 newSongCommentFromRequest' createdBy x = do
@@ -421,7 +424,7 @@ deleteSongComments' env identifiers = do
     . runDelete
     $ delete
       ((^. #songComments) wikiMusicDatabase)
-      (\c -> (c ^. #identifier) `in_` map val_ identifiers)
+      (\c -> (c ^. #identifier) `in_` map (val_ . UUID.toText) identifiers)
   pure . Right $ ()
 
 deleteSongArtworks' :: (MonadIO m) => Env -> [UUID] -> m (Either SongCommandError ())
@@ -431,7 +434,7 @@ deleteSongArtworks' env identifiers = do
     . runDelete
     $ delete
       ((^. #songArtworks) wikiMusicDatabase)
-      (\c -> (c ^. #identifier) `in_` map val_ identifiers)
+      (\c -> (c ^. #identifier) `in_` map (val_ . UUID.toText) identifiers)
   pure . Right $ ()
 
 deleteSongOpinions' :: (MonadIO m) => Env -> [UUID] -> m (Either SongCommandError ())
@@ -441,12 +444,15 @@ deleteSongOpinions' env identifiers = do
     . runDelete
     $ delete
       ((^. #songOpinions) wikiMusicDatabase)
-      (\c -> (c ^. #identifier) `in_` map val_ identifiers)
+      (\c -> (c ^. #identifier) `in_` map (val_ . UUID.toText) identifiers)
   pure . Right $ ()
+
+incrementViewsByOne' :: (MonadIO m) => Env -> [UUID] -> m (Either SongCommandError ())
+incrementViewsByOne' = undefined
 
 instance Exec SongCommand where
   execAlgebra (IncrementViewsByOne env identifiers next) =
-    next =<< incrementViewsByOne' env identifiers "songs"
+    next =<< incrementViewsByOne' env identifiers
   execAlgebra (InsertSongs env songs next) =
     next =<< insertSongs' env songs
   execAlgebra (InsertSongComments env comments next) =
@@ -492,7 +498,15 @@ instance Exec SongCommand where
   execAlgebra (InsertArtistsOfSongs env items next) =
     next =<< insertArtistsOfSongs' env items
   execAlgebra (DeleteArtistsOfSongs env identifiers next) =
-    next . first fromHasqlUsageError =<< deleteStuffByUUID (env ^. #pool) "song_artists" "song_identifier" identifiers
+    liftIO
+      . runBeamSqliteDebug putStrLn (env ^. #conn)
+      . runDelete
+      $ delete
+        ((^. #songArtists) wikiMusicDatabase)
+        (\c -> (c ^. #songIdentifier) `in_` map (val_ . SongId . UUID.toText) identifiers)
+        next
+      . Right
+      $ ()
   execAlgebra (DeleteArtistOfSong env identifiers next) =
     next =<< deleteArtistOfSong' env identifiers
   execAlgebra (NewSongFromRequest createdBy song next) =

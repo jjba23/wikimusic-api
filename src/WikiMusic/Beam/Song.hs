@@ -26,6 +26,7 @@ import Database.Beam
 import Optics
 import Relude
 import WikiMusic.Beam.Util
+import WikiMusic.Model.Artwork
 import WikiMusic.Model.Song
 import WikiMusic.Protolude
 

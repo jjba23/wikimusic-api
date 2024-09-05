@@ -9,7 +9,7 @@
 module WikiMusic.Sqlite.GenreCommand () where
 
 import Data.Map qualified as Map
-import Data.Text (pack)
+import Data.UUID qualified as UUID
 import Database.Beam
 import Database.Beam.Sqlite
 import Relude
@@ -81,9 +81,9 @@ upsertGenreOpinions' env opinions = do
             filter_
               ( \s ->
                   (s ^. #genreIdentifier)
-                    ==. val_ (GenreId $ o ^. #genreIdentifier)
+                    ==. val_ (GenreId $ UUID.toText $ o ^. #genreIdentifier)
                     &&. (s ^. #createdBy)
-                    ==. val_ (o ^. #opinion % #createdBy)
+                    ==. val_ (UUID.toText $ o ^. #opinion % #createdBy)
               )
               $ all_ ((^. #genreOpinions) wikiMusicDatabase)
         case exOpinion of
@@ -133,7 +133,7 @@ updateGenreArtworkOrder' env orderUpdates = do
         art <- liftIO $ runBeamSqliteDebug putStrLn (env ^. #conn) $ do
           runSelectReturningOne $ select $ do
             filter_
-              (\s -> (s ^. #identifier) ==. val_ (ou ^. #identifier))
+              (\s -> (s ^. #identifier) ==. val_ (UUID.toText $ ou ^. #identifier))
               $ all_ ((^. #genreArtworks) wikiMusicDatabase)
         case art of
           Nothing -> pure ()
@@ -171,7 +171,7 @@ updateGenreExternalSources' env deltas = do
         ex <- liftIO $ runBeamSqliteDebug putStrLn (env ^. #conn) $ do
           runSelectReturningOne $ select $ do
             filter_
-              (\s -> (s ^. #genreIdentifier) ==. val_ (GenreId $ genre ^. #identifier))
+              (\s -> (s ^. #genreIdentifier) ==. val_ (GenreId $ UUID.toText $ genre ^. #identifier))
               $ all_ ((^. #genreExternalSources) wikiMusicDatabase)
         case ex of
           Nothing -> pure ()
@@ -281,7 +281,7 @@ deleteGenreComments' env identifiers = do
     . runDelete
     $ delete
       ((^. #genreComments) wikiMusicDatabase)
-      (\c -> (c ^. #identifier) `in_` map val_ identifiers)
+      (\c -> (c ^. #identifier) `in_` map (val_ . UUID.toText) identifiers)
   pure . Right $ ()
 
 deleteGenreArtworks' :: (MonadIO m) => Env -> [UUID] -> m (Either GenreCommandError ())
@@ -291,7 +291,7 @@ deleteGenreArtworks' env identifiers = do
     . runDelete
     $ delete
       ((^. #genreArtworks) wikiMusicDatabase)
-      (\c -> (c ^. #identifier) `in_` map val_ identifiers)
+      (\c -> (c ^. #identifier) `in_` map (val_ . UUID.toText) identifiers)
   pure . Right $ ()
 
 deleteGenreOpinions' :: (MonadIO m) => Env -> [UUID] -> m (Either GenreCommandError ())
@@ -301,7 +301,7 @@ deleteGenreOpinions' env identifiers = do
     . runDelete
     $ delete
       ((^. #genreOpinions) wikiMusicDatabase)
-      (\c -> (c ^. #identifier) `in_` map val_ identifiers)
+      (\c -> (c ^. #identifier) `in_` map (val_ . UUID.toText) identifiers)
   pure . Right $ ()
 
 deleteCommentsOfGenres' :: (MonadIO m) => Env -> [UUID] -> m (Either GenreCommandError ())
@@ -311,12 +311,15 @@ deleteCommentsOfGenres' env identifiers = do
     . runDelete
     $ delete
       ((^. #genreComments) wikiMusicDatabase)
-      (\c -> (c ^. #genreIdentifier) `in_` map (val_ . GenreId) identifiers)
+      (\c -> (c ^. #genreIdentifier) `in_` map (val_ . GenreId . UUID.toText) identifiers)
   pure . Right $ ()
+
+incrementViewsByOne' :: (MonadIO m) => Env -> [UUID] -> m (Either GenreCommandError ())
+incrementViewsByOne' = undefined
 
 instance Exec GenreCommand where
   execAlgebra (IncrementViewsByOne env identifiers next) =
-    next =<< incrementViewsByOne' env identifiers "genres"
+    next =<< incrementViewsByOne' env identifiers
   execAlgebra (InsertGenres env genres next) =
     next =<< insertGenres' env genres
   execAlgebra (InsertGenreComments env comments next) =

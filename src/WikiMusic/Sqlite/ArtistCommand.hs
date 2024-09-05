@@ -10,6 +10,7 @@ module WikiMusic.Sqlite.ArtistCommand () where
 
 import Data.Map qualified as Map
 import Data.Text (pack)
+import Data.UUID qualified as UUID
 import Database.Beam
 import Database.Beam.Sqlite
 import Relude
@@ -79,9 +80,9 @@ upsertArtistOpinions' env opinions = do
             filter_
               ( \s ->
                   (s ^. #artistIdentifier)
-                    ==. val_ (ArtistId $ o ^. #artistIdentifier)
+                    ==. val_ (ArtistId $ UUID.toText $ o ^. #artistIdentifier)
                     &&. (s ^. #createdBy)
-                    ==. val_ (o ^. #opinion % #createdBy)
+                    ==. val_ (UUID.toText $ o ^. #opinion % #createdBy)
               )
               $ all_ ((^. #artistOpinions) wikiMusicDatabase)
         case exOpinion of
@@ -131,7 +132,7 @@ updateArtistArtworkOrder' env orderUpdates = do
         art <- liftIO $ runBeamSqliteDebug putStrLn (env ^. #conn) $ do
           runSelectReturningOne $ select $ do
             filter_
-              (\s -> (s ^. #identifier) ==. val_ (ou ^. #identifier))
+              (\s -> (s ^. #identifier) ==. val_ (UUID.toText $ ou ^. #identifier))
               $ all_ ((^. #artistArtworks) wikiMusicDatabase)
         case art of
           Nothing -> pure ()
@@ -169,7 +170,7 @@ updateArtistExternalSources' env deltas = do
         ex <- liftIO $ runBeamSqliteDebug putStrLn (env ^. #conn) $ do
           runSelectReturningOne $ select $ do
             filter_
-              (\s -> (s ^. #artistIdentifier) ==. val_ (ArtistId $ artist ^. #identifier))
+              (\s -> (s ^. #artistIdentifier) ==. val_ (ArtistId $ UUID.toText $ artist ^. #identifier))
               $ all_ ((^. #artistExternalSources) wikiMusicDatabase)
         case ex of
           Nothing -> pure ()
@@ -278,7 +279,7 @@ deleteArtistComments' env identifiers = do
     . runDelete
     $ delete
       ((^. #artistComments) wikiMusicDatabase)
-      (\c -> (c ^. #identifier) `in_` map val_ identifiers)
+      (\c -> (c ^. #identifier) `in_` map (val_ . UUID.toText) identifiers)
   pure . Right $ ()
 
 deleteArtistArtworks' :: (MonadIO m) => Env -> [UUID] -> m (Either ArtistCommandError ())
@@ -288,7 +289,7 @@ deleteArtistArtworks' env identifiers = do
     . runDelete
     $ delete
       ((^. #artistArtworks) wikiMusicDatabase)
-      (\c -> (c ^. #identifier) `in_` map val_ identifiers)
+      (\c -> (c ^. #identifier) `in_` map (val_ . UUID.toText) identifiers)
   pure . Right $ ()
 
 deleteArtistOpinions' :: (MonadIO m) => Env -> [UUID] -> m (Either ArtistCommandError ())
@@ -298,12 +299,15 @@ deleteArtistOpinions' env identifiers = do
     . runDelete
     $ delete
       ((^. #artistOpinions) wikiMusicDatabase)
-      (\c -> (c ^. #identifier) `in_` map val_ identifiers)
+      (\c -> (c ^. #identifier) `in_` map (val_ . UUID.toText) identifiers)
   pure . Right $ ()
+
+incrementViewsByOne' :: (MonadIO m) => Env -> [UUID] -> m (Either ArtistCommandError ())
+incrementViewsByOne' = undefined
 
 instance Exec ArtistCommand where
   execAlgebra (IncrementViewsByOne env identifiers next) =
-    next =<< incrementViewsByOne' env identifiers "artists"
+    next =<< incrementViewsByOne' env identifiers
   execAlgebra (InsertArtists env artists next) =
     next =<< insertArtists' env artists
   execAlgebra (InsertArtistComments env comments next) =
@@ -323,7 +327,17 @@ instance Exec ArtistCommand where
   execAlgebra (DeleteArtistOpinions env identifiers next) = do
     next =<< deleteArtistOpinions' env identifiers
   execAlgebra (DeleteCommentsOfArtists env identifiers next) = do
-    next . first fromHasqlUsageError =<< deleteStuffByUUID (env ^. #pool) "artist_comments" "artist_identifier" identifiers
+    let ids = map UUID.toText identifiers
+
+    mapM_
+      ( \y ->
+          runBeamSqliteDebug putStrLn (env ^. #conn)
+            . runDelete
+            $ delete ((^. #artistComments) wikiMusicDatabase) (\c -> c ^. #artistIdentifier ==. (val_ . ArtistId $ y))
+      )
+      ids
+
+    next $ Right ()
   execAlgebra (DeleteArtistExternalSources env identifiers next) = do
     next . first fromHasqlUsageError =<< deleteStuffByUUID (env ^. #pool) "artist_external_sources" "artist_identifier" identifiers
   execAlgebra (DeleteArtworksOfArtists env identifiers next) = do
