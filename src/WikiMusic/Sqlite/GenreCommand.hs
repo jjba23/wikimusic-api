@@ -118,13 +118,23 @@ uberDeleteGenres env identifiers = do
   deleteOpinionsOfGenresResult <- liftIO . exec @GenreCommand $ deleteOpinionsOfGenres env identifiers
   deleteCommentsOfGenresResult <- liftIO . exec @GenreCommand $ deleteCommentsOfGenres env identifiers
   deleteGenreExternalSourcesResult <- liftIO . exec @GenreCommand $ deleteGenreExternalSources env identifiers
-  deleteGenresResult <- deleteStuffByUUID (env ^. #pool) "genres" "identifier" identifiers
+  deleteGenresResult <- doDeleteGenres' env identifiers
   pure
     $ deleteArtworksOfGenresResult
     <> deleteOpinionsOfGenresResult
     <> deleteGenreExternalSourcesResult
     <> deleteCommentsOfGenresResult
-    <> first fromHasqlUsageError deleteGenresResult
+    <> deleteGenresResult
+
+doDeleteGenres' :: (MonadIO m) => Env -> [UUID] -> m (Either GenreCommandError ())
+doDeleteGenres' env identifiers = do
+  liftIO
+    . runBeamSqliteDebug putStrLn (env ^. #conn)
+    . runDelete
+    $ delete
+      ((^. #genres) wikiMusicDatabase)
+      (\c -> (c ^. #identifier) `in_` map (val_ . UUID.toText) identifiers)
+  pure . Right $ ()
 
 updateGenreArtworkOrder' :: (MonadIO m) => Env -> [GenreArtworkOrderUpdate] -> m (Either a ())
 updateGenreArtworkOrder' env orderUpdates = do
@@ -315,7 +325,25 @@ deleteCommentsOfGenres' env identifiers = do
   pure . Right $ ()
 
 incrementViewsByOne' :: (MonadIO m) => Env -> [UUID] -> m (Either GenreCommandError ())
-incrementViewsByOne' = undefined
+incrementViewsByOne' env identifiers = do
+  mapM_ doUpdate identifiers
+  pure $ Right ()
+  where
+    doUpdate x = do
+      ex <- liftIO $ runBeamSqliteDebug putStrLn (env ^. #conn) $ do
+        runSelectReturningOne $ select $ do
+          filter_
+            (\s -> (s ^. #identifier) ==. (val_ . UUID.toText $ x))
+            $ all_ ((^. #genres) wikiMusicDatabase)
+      case ex of
+        Nothing -> pure ()
+        Just foundEx -> do
+          let a =
+                foundEx
+                  { viewCount = (foundEx ^. #viewCount) + 1
+                  } ::
+                  Genre'
+          liftIO . runBeamSqliteDebug putStrLn (env ^. #conn) . runUpdate . save ((^. #genres) wikiMusicDatabase) $ a
 
 instance Exec GenreCommand where
   execAlgebra (IncrementViewsByOne env identifiers next) =
@@ -338,14 +366,42 @@ instance Exec GenreCommand where
     next =<< deleteGenreArtworks' env identifiers
   execAlgebra (DeleteGenreOpinions env identifiers next) =
     next =<< deleteGenreOpinions' env identifiers
-  execAlgebra (DeleteCommentsOfGenres env identifiers next) =
-    next =<< deleteCommentsOfGenres' env identifiers
+  execAlgebra (DeleteCommentsOfGenres env identifiers next) = do
+    let ids = map UUID.toText identifiers
+
+    mapM_
+      ( \y ->
+          runBeamSqliteDebug putStrLn (env ^. #conn)
+            . runDelete
+            $ delete ((^. #genreComments) wikiMusicDatabase) (\c -> c ^. #genreIdentifier ==. (val_ . GenreId $ y))
+      )
+      ids
+
+    next $ Right ()
   execAlgebra (DeleteGenreExternalSources env identifiers next) = do
-    next . first fromHasqlUsageError =<< deleteStuffByUUID (env ^. #pool) "genre_external_sources" "genre_identifier" identifiers
+    liftIO
+      . runBeamSqliteDebug putStrLn (env ^. #conn)
+      . runDelete
+      $ delete
+        ((^. #genreExternalSources) wikiMusicDatabase)
+        (\c -> (c ^. #genreIdentifier) `in_` map (val_ . GenreId . UUID.toText) identifiers)
+    next . Right $ ()
   execAlgebra (DeleteArtworksOfGenres env identifiers next) = do
-    next . first fromHasqlUsageError =<< deleteStuffByUUID (env ^. #pool) "genre_artworks" "genre_identifier" identifiers
+    liftIO
+      . runBeamSqliteDebug putStrLn (env ^. #conn)
+      . runDelete
+      $ delete
+        ((^. #genreArtworks) wikiMusicDatabase)
+        (\c -> (c ^. #genreIdentifier) `in_` map (val_ . GenreId . UUID.toText) identifiers)
+    next . Right $ ()
   execAlgebra (DeleteOpinionsOfGenres env identifiers next) = do
-    next . first fromHasqlUsageError =<< deleteStuffByUUID (env ^. #pool) "genre_opinions" "genre_identifier" identifiers
+    liftIO
+      . runBeamSqliteDebug putStrLn (env ^. #conn)
+      . runDelete
+      $ delete
+        ((^. #genreOpinions) wikiMusicDatabase)
+        (\c -> (c ^. #genreIdentifier) `in_` map (val_ . GenreId . UUID.toText) identifiers)
+    next . Right $ ()
   execAlgebra (UpdateGenreArtworkOrder env orderUpdates next) =
     next =<< updateGenreArtworkOrder' env orderUpdates
   execAlgebra (UpdateGenres env deltas next) =
