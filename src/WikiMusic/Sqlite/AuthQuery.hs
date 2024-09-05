@@ -26,7 +26,7 @@ instance Exec AuthQuery where
 
 fetchMe' :: (MonadIO m) => Env -> UUID -> m (Either AuthQueryError (Maybe WikiMusicUser))
 fetchMe' env identifier = do
-  maybeUser <- liftIO . runBeamPostgresDebug putStrLn (env ^. #conn) . runSelectReturningFirst . select $ do
+  maybeUser <- liftIO . runBeamSqliteDebug putStrLn (env ^. #conn) . runSelectReturningFirst . select $ do
     filter_ (\s -> (s ^. #identifier) ==. val_ identifier)
       $ all_ ((^. #users) wikiMusicDatabase)
   case maybeUser of
@@ -37,7 +37,7 @@ fetchMe' env identifier = do
 
 fetchUserForAuthCheck' :: (MonadIO m) => Env -> Text -> m (Either AuthQueryError (Maybe WikiMusicUser))
 fetchUserForAuthCheck' env email = do
-  maybeUser <- liftIO . runBeamPostgresDebug putStrLn (env ^. #conn) . runSelectReturningFirst . select $ do
+  maybeUser <- liftIO . runBeamSqliteDebug putStrLn (env ^. #conn) . runSelectReturningFirst . select $ do
     filter_ (\s -> (s ^. #emailAddress) ==. val_ email)
       $ all_ ((^. #users) wikiMusicDatabase)
 
@@ -49,7 +49,7 @@ fetchUserForAuthCheck' env email = do
 
 fetchUserFromToken' :: (MonadIO m) => Env -> Text -> m (Either AuthQueryError (Maybe WikiMusicUser))
 fetchUserFromToken' env t = do
-  maybeUser <- liftIO . runBeamPostgresDebug putStrLn (env ^. #conn) . runSelectReturningFirst . select $ do
+  maybeUser <- liftIO . runBeamSqliteDebug putStrLn (env ^. #conn) . runSelectReturningFirst . select $ do
     filter_ (\s -> (s ^. #authToken) ==. val_ (Just t))
       $ all_ ((^. #users) wikiMusicDatabase)
 
@@ -61,7 +61,7 @@ fetchUserFromToken' env t = do
 
 fetchUserRoles' :: (MonadIO m) => Env -> UUID -> m (Either AuthQueryError [UserRole])
 fetchUserRoles' env identifier = do
-  userRoles <- liftIO . runBeamPostgresDebug putStrLn (env ^. #conn) . runSelectReturningList . select $ do
+  userRoles <- liftIO . runBeamSqliteDebug putStrLn (env ^. #conn) . runSelectReturningList . select $ do
     filter_ (\s -> (s ^. #userIdentifier) ==. (val_ . UserId $ identifier))
       $ all_ ((^. #userRoles) wikiMusicDatabase)
 

@@ -20,17 +20,11 @@ readConfig filePath = do
 
 readSecrets :: (MonadIO m) => AppConfig -> m AppConfig
 readSecrets cfg = do
-  postgresqlPassword <- readSecretFromFile cfg (^. #postgresql % #passwordFile)
-  redisPassword <- readSecretFromFile cfg (^. #redis % #passwordFile)
   mailPassword <- readSecretFromFile cfg (^. #mail % #passwordFile)
   mailUser <- readSecretFromFile cfg (^. #mail % #userFile)
-  let withRedisCfg = cfg & #redis .~ ((cfg ^. #redis) & #password ?~ redisPassword)
-      withPostgresCfg =
-        withRedisCfg
-          & #postgresql
-          .~ ((withRedisCfg ^. #postgresql) & #password ?~ postgresqlPassword)
+  let 
       withMailPasswordCfg =
-        withPostgresCfg
+        cfg
           & #mail
           .~ ((withPostgresCfg ^. #mail) & #password ?~ mailPassword)
       withMailUserCfg =

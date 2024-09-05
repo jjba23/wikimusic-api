@@ -41,7 +41,7 @@ instance Exec UserCommand where
 
 makeToken :: (MonadIO m) => Env -> UUID -> m (Either UserCommandError Text)
 makeToken env identifier = do
-  maybeUser <- liftIO $ runBeamPostgresDebug putStrLn (env ^. #conn) $ do
+  maybeUser <- liftIO $ runBeamSqliteDebug putStrLn (env ^. #conn) $ do
     runSelectReturningFirst $ select $ do
       filter_
         ( \s ->
@@ -59,7 +59,7 @@ makeToken env identifier = do
         Right t -> do
           _ <-
             liftIO
-              . runBeamPostgresDebug putStrLn (env ^. #conn)
+              . runBeamSqliteDebug putStrLn (env ^. #conn)
               . runUpdate
               $ save
                 ((^. #users) wikiMusicDatabase)
@@ -186,7 +186,7 @@ addUser env email name' role desc = do
 
 doIfUserFoundByEmail :: (MonadIO m) => Env -> UserEmail -> (UUID -> m (Either UserCommandError a)) -> m (Either UserCommandError a)
 doIfUserFoundByEmail env email eff = do
-  maybeUser <- liftIO $ runBeamPostgresDebug putStrLn (env ^. #conn) $ do
+  maybeUser <- liftIO $ runBeamSqliteDebug putStrLn (env ^. #conn) $ do
     runSelectReturningFirst $ select $ do
       filter_
         ( \s ->
@@ -201,7 +201,7 @@ doIfUserFoundByEmail env email eff = do
 
 deleteU :: (MonadIO m) => Env -> UUID -> m (Either UserCommandError ())
 deleteU env identifier = do
-  maybeUser <- liftIO $ runBeamPostgresDebug putStrLn (env ^. #conn) $ do
+  maybeUser <- liftIO $ runBeamSqliteDebug putStrLn (env ^. #conn) $ do
     runSelectReturningFirst $ select $ do
       filter_
         ( \s ->
@@ -214,7 +214,7 @@ deleteU env identifier = do
     Just x -> do
       _ <-
         liftIO
-          . runBeamPostgresDebug putStrLn (env ^. #conn)
+          . runBeamSqliteDebug putStrLn (env ^. #conn)
           . runUpdate
           $ save ((^. #users) wikiMusicDatabase) (x {passwordHash = Just "", authToken = Just ""} :: User')
       pure . Right $ ()

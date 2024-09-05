@@ -50,7 +50,7 @@ mkOrderBy DescLastEditedAt = orderBy_ (desc_ . (^. #lastEditedAt))
 -- | Fetch artists from storage, according to a sort order, limit and offset
 fetchArtists' :: (MonadIO m) => Env -> ArtistSortOrder -> Limit -> Offset -> m (Map UUID Artist, [UUID])
 fetchArtists' env sortOrder (Limit limit) (Offset offset) = do
-  artists <- liftIO $ runBeamPostgresDebug putStrLn (env ^. #conn) $ do
+  artists <- liftIO $ runBeamSqliteDebug putStrLn (env ^. #conn) $ do
     runSelectReturningList
       . select
       . offset_ (fromIntegral offset)
@@ -64,7 +64,7 @@ fetchArtistsByUUID' :: (MonadIO m) => Env -> ArtistSortOrder -> [UUID] -> m (Map
 fetchArtistsByUUID' env sortOrder identifiers = do
   artists <-
     liftIO
-      . runBeamPostgresDebug putStrLn (env ^. #conn)
+      . runBeamSqliteDebug putStrLn (env ^. #conn)
       . runSelectReturningList
       . select
       . filter_ (\s -> (s ^. #identifier) `in_` map val_ identifiers)
@@ -76,7 +76,7 @@ fetchArtistsByUUID' env sortOrder identifiers = do
 fetchArtistArtworks' :: (MonadIO m) => Env -> [UUID] -> m (Map UUID ArtistArtwork)
 fetchArtistArtworks' env identifiers = do
   artworks <- liftIO
-    . runBeamPostgresDebug putStrLn (env ^. #conn)
+    . runBeamSqliteDebug putStrLn (env ^. #conn)
     . runSelectReturningList
     . select
     . orderBy_ (asc_ . (^. #orderValue))
@@ -130,7 +130,7 @@ enrichedArtistResponse' env artistMap enrichArtistParams = do
 -- | Fetch artist comments from storage
 fetchArtistComments' :: (MonadIO m) => Env -> [UUID] -> m (Map UUID ArtistComment)
 fetchArtistComments' env identifiers = do
-  comments <- liftIO $ runBeamPostgresDebug putStrLn (env ^. #conn) $ do
+  comments <- liftIO $ runBeamSqliteDebug putStrLn (env ^. #conn) $ do
     runSelectReturningList $ select $ do
       artists <-
         filter_ (\s -> (s ^. #identifier) `in_` map val_ identifiers)
@@ -143,7 +143,7 @@ searchArtists' :: (MonadIO m) => Env -> SearchInput -> ArtistSortOrder -> Limit 
 searchArtists' env searchInput sortOrder (Limit limit) (Offset offset) = do
   artists <-
     liftIO
-      . runBeamPostgresDebug putStrLn (env ^. #conn)
+      . runBeamSqliteDebug putStrLn (env ^. #conn)
       . runSelectReturningList
       . select
       . filter_ (\s -> (s ^. #displayName) `ilike_` val_ ("%" <> searchInput ^. #value <> "%"))
@@ -156,7 +156,7 @@ searchArtists' env searchInput sortOrder (Limit limit) (Offset offset) = do
 -- | Fetch artist opinions from storage
 fetchArtistOpinions' :: (MonadIO m) => Env -> [UUID] -> m (Map UUID ArtistOpinion)
 fetchArtistOpinions' env identifiers = do
-  opinions <- liftIO $ runBeamPostgresDebug putStrLn (env ^. #conn) $ do
+  opinions <- liftIO $ runBeamSqliteDebug putStrLn (env ^. #conn) $ do
     runSelectReturningList $ select $ do
       artists <-
         filter_ (\s -> (s ^. #identifier) `in_` map val_ identifiers)
@@ -167,7 +167,7 @@ fetchArtistOpinions' env identifiers = do
 
 filledArtists :: (MonadIO m) => Env -> [Artist'] -> m (Map UUID Artist, [UUID])
 filledArtists env artists = do
-  externalSources <- liftIO $ runBeamPostgresDebug putStrLn (env ^. #conn) $ do
+  externalSources <- liftIO $ runBeamSqliteDebug putStrLn (env ^. #conn) $ do
     runSelectReturningList
       . select
       . filter_ (\s -> (s ^. #artistIdentifier) `in_` map (val_ . (\x -> ArtistId $ x ^. #identifier)) artists)

@@ -26,7 +26,7 @@ import WikiMusic.Protolude
 insertArtists' :: (MonadIO m) => Env -> [Artist] -> m ()
 insertArtists' env artists = do
   liftIO
-    . runBeamPostgresDebug putStrLn (env ^. #conn)
+    . runBeamSqliteDebug putStrLn (env ^. #conn)
     . runInsert
     . insert ((^. #artists) wikiMusicDatabase)
     $ insertValues (map toPersistenceArtist artists)
@@ -39,7 +39,7 @@ insertArtists' env artists = do
       )
       artists
   liftIO
-    . runBeamPostgresDebug putStrLn (env ^. #conn)
+    . runBeamSqliteDebug putStrLn (env ^. #conn)
     . runInsert
     . insert ((^. #artistExternalSources) wikiMusicDatabase)
     $ insertValues externalContents
@@ -47,7 +47,7 @@ insertArtists' env artists = do
 insertArtistComments' :: (MonadIO m) => Env -> [ArtistComment] -> m ()
 insertArtistComments' env comments = do
   liftIO
-    . runBeamPostgresDebug putStrLn (env ^. #conn)
+    . runBeamSqliteDebug putStrLn (env ^. #conn)
     . runInsert
     . insert ((^. #artistComments) wikiMusicDatabase)
     $ insertValues (map toPersistenceArtistComment comments)
@@ -55,7 +55,7 @@ insertArtistComments' env comments = do
 insertArtistExternalSources' :: (MonadIO m) => Env -> [ArtistExternalSources] -> m (Map UUID ArtistExternalSources)
 insertArtistExternalSources' env externalSources = do
   liftIO
-    . runBeamPostgresDebug putStrLn (env ^. #conn)
+    . runBeamSqliteDebug putStrLn (env ^. #conn)
     . runInsert
     . insert ((^. #artistExternalSources) wikiMusicDatabase)
     $ insertValues (map mkArtistExSourcesP externalSources)
@@ -64,7 +64,7 @@ insertArtistExternalSources' env externalSources = do
 insertArtistArtworks' :: (MonadIO m) => Env -> [ArtistArtwork] -> m (Map UUID ArtistArtwork)
 insertArtistArtworks' env artworks = do
   liftIO
-    . runBeamPostgresDebug putStrLn (env ^. #conn)
+    . runBeamSqliteDebug putStrLn (env ^. #conn)
     . runInsert
     . insert ((^. #artistArtworks) wikiMusicDatabase)
     $ insertValues (map mkArtistArtworkP artworks)
@@ -74,7 +74,7 @@ upsertArtistOpinions' :: (MonadIO m) => Env -> [ArtistOpinion] -> m (Map UUID Ar
 upsertArtistOpinions' env opinions = do
   mapM_
     ( \o -> do
-        exOpinion <- liftIO $ runBeamPostgresDebug putStrLn (env ^. #conn) $ do
+        exOpinion <- liftIO $ runBeamSqliteDebug putStrLn (env ^. #conn) $ do
           runSelectReturningOne $ select $ do
             filter_
               ( \s ->
@@ -87,7 +87,7 @@ upsertArtistOpinions' env opinions = do
         case exOpinion of
           Nothing ->
             liftIO
-              . runBeamPostgresDebug putStrLn (env ^. #conn)
+              . runBeamSqliteDebug putStrLn (env ^. #conn)
               . runInsert
               . insert ((^. #artistOpinions) wikiMusicDatabase)
               $ insertValues [mkArtistOpinionP o]
@@ -101,7 +101,7 @@ upsertArtistOpinions' env opinions = do
                   ) ::
                     ArtistOpinion'
             liftIO
-              . runBeamPostgresDebug putStrLn (env ^. #conn)
+              . runBeamSqliteDebug putStrLn (env ^. #conn)
               . runUpdate
               $ save ((^. #artistOpinions) wikiMusicDatabase) newO
         pure ()
@@ -128,7 +128,7 @@ updateArtistArtworkOrder' :: (MonadIO m) => Env -> [ArtistArtworkOrderUpdate] ->
 updateArtistArtworkOrder' env orderUpdates = do
   mapM_
     ( \ou -> do
-        art <- liftIO $ runBeamPostgresDebug putStrLn (env ^. #conn) $ do
+        art <- liftIO $ runBeamSqliteDebug putStrLn (env ^. #conn) $ do
           runSelectReturningOne $ select $ do
             filter_
               (\s -> (s ^. #identifier) ==. val_ (ou ^. #identifier))
@@ -137,7 +137,7 @@ updateArtistArtworkOrder' env orderUpdates = do
           Nothing -> pure ()
           Just foundArt -> do
             let a = foundArt {orderValue = fromIntegral $ ou ^. #orderValue} :: ArtistArtwork'
-            liftIO . runBeamPostgresDebug putStrLn (env ^. #conn) . runUpdate . save ((^. #artistArtworks) wikiMusicDatabase) $ a
+            liftIO . runBeamSqliteDebug putStrLn (env ^. #conn) . runUpdate . save ((^. #artistArtworks) wikiMusicDatabase) $ a
     )
     orderUpdates
   pure . Right $ ()
@@ -149,7 +149,7 @@ updateArtists' env deltas = do
   exUpdate <- liftIO $ exec @ArtistCommand $ updateArtistExternalSources env deltas
   pure $ exUpdate <> Right ()
   where
-    save'' x = liftIO . runBeamPostgresDebug putStrLn (env ^. #conn) . runUpdate $ save ((^. #artists) wikiMusicDatabase) x
+    save'' x = liftIO . runBeamSqliteDebug putStrLn (env ^. #conn) . runUpdate $ save ((^. #artists) wikiMusicDatabase) x
     doDelta now (x, xDelta') =
       case xDelta' of
         Nothing -> x
@@ -166,7 +166,7 @@ updateArtistExternalSources' env deltas = do
   now <- liftIO getCurrentTime
   mapM_
     ( \(artist, xDelta) -> do
-        ex <- liftIO $ runBeamPostgresDebug putStrLn (env ^. #conn) $ do
+        ex <- liftIO $ runBeamSqliteDebug putStrLn (env ^. #conn) $ do
           runSelectReturningOne $ select $ do
             filter_
               (\s -> (s ^. #artistIdentifier) ==. val_ (ArtistId $ artist ^. #identifier))
@@ -183,7 +183,7 @@ updateArtistExternalSources' env deltas = do
                       lastEditedAt = Just now
                     } ::
                     ArtistExternalSources'
-            liftIO . runBeamPostgresDebug putStrLn (env ^. #conn) . runUpdate . save ((^. #artistExternalSources) wikiMusicDatabase) $ a
+            liftIO . runBeamSqliteDebug putStrLn (env ^. #conn) . runUpdate . save ((^. #artistExternalSources) wikiMusicDatabase) $ a
     )
     deltas
   pure . Right $ ()
@@ -274,7 +274,7 @@ newArtistCommentFromRequest' createdBy x = do
 deleteArtistComments' :: (MonadIO m) => Env -> [UUID] -> m (Either ArtistCommandError ())
 deleteArtistComments' env identifiers = do
   liftIO
-    . runBeamPostgresDebug putStrLn (env ^. #conn)
+    . runBeamSqliteDebug putStrLn (env ^. #conn)
     . runDelete
     $ delete
       ((^. #artistComments) wikiMusicDatabase)
@@ -284,7 +284,7 @@ deleteArtistComments' env identifiers = do
 deleteArtistArtworks' :: (MonadIO m) => Env -> [UUID] -> m (Either ArtistCommandError ())
 deleteArtistArtworks' env identifiers = do
   liftIO
-    . runBeamPostgresDebug putStrLn (env ^. #conn)
+    . runBeamSqliteDebug putStrLn (env ^. #conn)
     . runDelete
     $ delete
       ((^. #artistArtworks) wikiMusicDatabase)
@@ -294,7 +294,7 @@ deleteArtistArtworks' env identifiers = do
 deleteArtistOpinions' :: (MonadIO m) => Env -> [UUID] -> m (Either ArtistCommandError ())
 deleteArtistOpinions' env identifiers = do
   liftIO
-    . runBeamPostgresDebug putStrLn (env ^. #conn)
+    . runBeamSqliteDebug putStrLn (env ^. #conn)
     . runDelete
     $ delete
       ((^. #artistOpinions) wikiMusicDatabase)
@@ -344,3 +344,4 @@ instance Exec ArtistCommand where
     next =<< newArtistOpinionFromRequest' createdBy req
   execAlgebra (NewArtistArtworkFromRequest createdBy req next) =
     next =<< newArtistArtworkFromRequest' createdBy req
+

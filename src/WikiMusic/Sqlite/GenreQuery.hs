@@ -50,7 +50,7 @@ mkOrderBy DescLastEditedAt = orderBy_ (desc_ . (^. #lastEditedAt))
 -- | Fetch genres from storage, according to a sort order, limit and offset
 fetchGenres' :: (MonadIO m) => Env -> GenreSortOrder -> Limit -> Offset -> m (Map UUID Genre, [UUID])
 fetchGenres' env sortOrder (Limit limit) (Offset offset) = do
-  genres <- liftIO $ runBeamPostgresDebug putStrLn (env ^. #conn) $ do
+  genres <- liftIO $ runBeamSqliteDebug putStrLn (env ^. #conn) $ do
     runSelectReturningList
       . select
       . offset_ (fromIntegral offset)
@@ -64,7 +64,7 @@ fetchGenresByUUID' :: (MonadIO m) => Env -> GenreSortOrder -> [UUID] -> m (Map U
 fetchGenresByUUID' env sortOrder identifiers = do
   genres <-
     liftIO
-      . runBeamPostgresDebug putStrLn (env ^. #conn)
+      . runBeamSqliteDebug putStrLn (env ^. #conn)
       . runSelectReturningList
       . select
       . filter_ (\s -> (s ^. #identifier) `in_` map val_ identifiers)
@@ -76,7 +76,7 @@ fetchGenresByUUID' env sortOrder identifiers = do
 fetchGenreArtworks' :: (MonadIO m) => Env -> [UUID] -> m (Map UUID GenreArtwork)
 fetchGenreArtworks' env identifiers = do
   artworks <- liftIO
-    . runBeamPostgresDebug putStrLn (env ^. #conn)
+    . runBeamSqliteDebug putStrLn (env ^. #conn)
     . runSelectReturningList
     . select
     . orderBy_ (asc_ . (^. #orderValue))
@@ -130,7 +130,7 @@ enrichedGenreResponse' env genreMap enrichGenreParams = do
 -- | Fetch genre comments from storage
 fetchGenreComments' :: (MonadIO m) => Env -> [UUID] -> m (Map UUID GenreComment)
 fetchGenreComments' env identifiers = do
-  comments <- liftIO $ runBeamPostgresDebug putStrLn (env ^. #conn) $ do
+  comments <- liftIO $ runBeamSqliteDebug putStrLn (env ^. #conn) $ do
     runSelectReturningList $ select $ do
       genres <-
         filter_ (\s -> (s ^. #identifier) `in_` map val_ identifiers)
@@ -144,7 +144,7 @@ searchGenres' :: (MonadIO m) => Env -> SearchInput -> GenreSortOrder -> Limit ->
 searchGenres' env searchInput sortOrder (Limit limit) (Offset offset) = do
   genres <-
     liftIO
-      . runBeamPostgresDebug putStrLn (env ^. #conn)
+      . runBeamSqliteDebug putStrLn (env ^. #conn)
       . runSelectReturningList
       . select
       . filter_ (\s -> (s ^. #displayName) `ilike_` val_ ("%" <> searchInput ^. #value <> "%"))
@@ -157,7 +157,7 @@ searchGenres' env searchInput sortOrder (Limit limit) (Offset offset) = do
 -- | Fetch genre opinions from storage
 fetchGenreOpinions' :: (MonadIO m) => Env -> [UUID] -> m (Map UUID GenreOpinion)
 fetchGenreOpinions' env identifiers = do
-  opinions <- liftIO $ runBeamPostgresDebug putStrLn (env ^. #conn) $ do
+  opinions <- liftIO $ runBeamSqliteDebug putStrLn (env ^. #conn) $ do
     runSelectReturningList $ select $ do
       genres <-
         filter_ (\s -> (s ^. #identifier) `in_` map val_ identifiers)
@@ -168,7 +168,7 @@ fetchGenreOpinions' env identifiers = do
 
 filledGenres :: (MonadIO m) => Env -> [Genre'] -> m (Map UUID Genre, [UUID])
 filledGenres env genres = do
-  externalSources <- liftIO $ runBeamPostgresDebug putStrLn (env ^. #conn) $ do
+  externalSources <- liftIO $ runBeamSqliteDebug putStrLn (env ^. #conn) $ do
     runSelectReturningList
       . select
       . filter_ (\s -> (s ^. #genreIdentifier) `in_` map (val_ . (\x -> GenreId $ x ^. #identifier)) genres)

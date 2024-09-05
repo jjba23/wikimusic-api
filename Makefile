@@ -5,8 +5,6 @@ fmt:
 	find . -name '*.nix' -exec nixfmt {} \;
 	-statix check
 	-deadnix -f
-spin-up-containers-local:
-	docker-compose -f resources/docker/local-compose.yaml up -d
 # dev: fmt
 # 	ghcid --warnings --restart=./wikimusic-api.cabal --test "WikiMusic.Boot.boot"
 dev: fmt

@@ -67,7 +67,7 @@ library
       WikiMusic.Beam.Util
       WikiMusic.Beam.Relations
       
-      -- λ postgresql implementations
+      -- λ sqlite implementations
       WikiMusic.Sqlite.ArtistCommand
       WikiMusic.Sqlite.ArtistQuery
       WikiMusic.Sqlite.AuthQuery

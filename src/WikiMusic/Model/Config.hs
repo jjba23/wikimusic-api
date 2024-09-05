@@ -132,9 +132,7 @@ appConfigCodec =
     <$> Toml.table servantConfigCodec "servant"
     .= (^. #servant)
     <*> Toml.table sqliteConfigCodec "sqlite"
-    .= (^. #postgresql)
-    <*> Toml.table redisConfigCodec "redis"
-    .= (^. #redis)
+    .= (^. #sqlite)
     <*> Toml.table corsConfigCodec "cors"
     .= (^. #cors)
     <*> Toml.table mailConfigCodec "mail"
@@ -146,7 +144,6 @@ appConfigCodec =
 
 makeFieldLabelsNoPrefix ''AppConfig
 makeFieldLabelsNoPrefix ''SqliteConfig
-makeFieldLabelsNoPrefix ''RedisConfig
 makeFieldLabelsNoPrefix ''ServantConfig
 makeFieldLabelsNoPrefix ''CorsConfig
 makeFieldLabelsNoPrefix ''MailConfig

@@ -26,7 +26,7 @@ instance Exec UserQuery where
 doesTokenMatchByEmail' :: (MonadIO m) => Env -> UserEmail -> UserToken -> m (Either UserQueryError Bool)
 doesTokenMatchByEmail' env email token = do
   maybeUser <- liftIO
-    . runBeamPostgresDebug putStrLn (env ^. #conn)
+    . runBeamSqliteDebug putStrLn (env ^. #conn)
     . runSelectReturningFirst
     . select
     $ do
@@ -42,7 +42,7 @@ doesTokenMatchByEmail' env email token = do
 getUsers' :: (MonadIO m) => Env -> m (Either UserQueryError [User])
 getUsers' env = do
   users <- liftIO
-    . runBeamPostgresDebug putStrLn (env ^. #conn)
+    . runBeamSqliteDebug putStrLn (env ^. #conn)
     . runSelectReturningList
     . select
     $ do
