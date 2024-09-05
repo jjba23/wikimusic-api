@@ -3,15 +3,11 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GADTs #-}
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedLabels #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE QuasiQuotes #-}
-{-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -fno-warn-missing-signatures #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
@@ -22,7 +18,6 @@ import Data.Map (elems, keys)
 import Data.Map qualified as Map
 import Data.UUID
 import Data.UUID qualified as UUID
-import Data.Vector qualified as V
 import Database.Beam
 import Database.Beam.Sqlite
 import Free.AlaCarte
@@ -179,7 +174,7 @@ enrichedSongResponse' env songMap enrichSongParams = do
   pure enrichedSongs
 
 fetchSongArtists' :: (MonadIO m) => Env -> [UUID] -> m [(UUID, UUID, Text)]
-fetchSongArtists' env identifiers = undefined
+fetchSongArtists' env identifiers = pure []
 
 -- let stmt = Statement query encoder decoder True
 --     query =

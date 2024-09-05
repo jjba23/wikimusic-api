@@ -22,13 +22,12 @@ echo "Starting the grabbing and restoring of a WikiMusic backup"
 export AWS_PROFILE=master-infra
 
 echo "Fetching latest backup file for WikiMusic"
-DB_BACKUP_FILE=$(aws s3 ls s3://cloud-infra-state-jjba/wikimusic/backups/postgresql/ | grep wikimusic_database_ | sort | tail -n 1 | awk '{print $4}')
+DB_BACKUP_FILE=$(aws s3 ls s3://cloud-infra-state-jjba/wikimusic/backups/sqlite/ | grep wikimusic | sort | tail -n 1 | awk '{print $4}')
 
 aws s3 cp s3://cloud-infra-state-jjba/wikimusic/backups/postgresql/$DB_BACKUP_FILE $HOME/$DB_BACKUP_FILE
 
 
 echo "Restoring from latest database backup"
-export PGPASSWORD=wikimusic_admin
-nix-shell -p postgresql \
+nix-shell -p sqlite \
 	  --run "psql -U wikimusic_admin wikimusic_database -p 55432 -h localhost < $HOME/$DB_BACKUP_FILE"
 

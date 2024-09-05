@@ -1,6 +1,5 @@
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE OverloadedLabels #-}
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE NoFieldSelectors #-}
 {-# OPTIONS_GHC -fno-warn-ambiguous-fields #-}
@@ -9,7 +8,6 @@
 module WikiMusic.Sqlite.ArtistCommand () where
 
 import Data.Map qualified as Map
-import Data.Text (pack)
 import Data.UUID qualified as UUID
 import Database.Beam
 import Database.Beam.Sqlite

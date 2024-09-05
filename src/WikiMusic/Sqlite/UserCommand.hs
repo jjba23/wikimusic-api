@@ -1,11 +1,6 @@
-{-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE GADTs #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedLabels #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE QuasiQuotes #-}
-{-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE NoFieldSelectors #-}
 {-# OPTIONS_GHC -fno-warn-ambiguous-fields #-}
@@ -16,6 +11,7 @@ module WikiMusic.Sqlite.UserCommand () where
 import Data.ByteString.Base64 qualified
 import Data.Password.Bcrypt
 import Data.Text (pack)
+import Data.Text qualified as T
 import Data.UUID qualified as UUID
 import Data.UUID.V4
 import Database.Beam
@@ -78,7 +74,7 @@ invalidateToken env identifier = do
   art <- liftIO $ runBeamSqliteDebug putStrLn (env ^. #conn) $ do
     runSelectReturningOne $ select $ do
       filter_
-        (\s -> (s ^. #identifier) ==. val_ (UUID.toText $ identifier))
+        (\s -> (s ^. #identifier) ==. val_ (UUID.toText identifier))
         $ all_ ((^. #users) wikiMusicDatabase)
   case art of
     Nothing -> pure . Right $ ()
@@ -95,7 +91,7 @@ changePassword env password identifier = do
   art <- liftIO $ runBeamSqliteDebug putStrLn (env ^. #conn) $ do
     runSelectReturningOne $ select $ do
       filter_
-        (\s -> (s ^. #identifier) ==. val_ (UUID.toText $ identifier))
+        (\s -> (s ^. #identifier) ==. val_ (UUID.toText identifier))
         $ all_ ((^. #users) wikiMusicDatabase)
   case art of
     Nothing -> pure . Right $ ()
@@ -124,59 +120,42 @@ addUser env email name' role desc = do
   now <- liftIO getCurrentTime
   identifier <- liftIO nextRandom
   new <- liftIO nextRandom
-  pure . Right $ ""
-
--- maybeRowsAff <-
---   liftIO
---     $ hasqlTransaction (env ^. #pool) stmt (identifier, name' ^. #value, email ^. #value, pack . Relude.show $ identifier, now, Just (newToken now new), desc)
--- let creation = bimap fromHasqlUsageError (const ()) maybeRowsAff
--- case creation of
---   Left e -> do
---     _ <- liftIO $ putTextLn . pack . Relude.show $ e
---     pure . Left $ e
---   Right _ -> do
---     someUUID <- liftIO nextRandom
---     maybeRowsAff' <-
---       liftIO
---         $ hasqlTransaction (env ^. #pool) roleStmt (someUUID, identifier, pack . Relude.show $ role, now)
---     let rol = bimap fromHasqlUsageError (const ()) maybeRowsAff'
---     case rol of
---       Left e -> do
---         _ <- liftIO $ putTextLn . pack . Relude.show $ e
---         pure . Left $ e
---       Right _ -> doIfUserFoundByEmail env email (makeToken env)
--- where
---   stmt = Statement query encoder D.noResult True
---   roleStmt = Statement roleQuery roleEncoder D.noResult True
---   encoder =
---     contrazip7
---       (E.param . E.nonNullable $ E.uuid)
---       (E.param . E.nonNullable $ E.text)
---       (E.param . E.nonNullable $ E.text)
---       (E.param . E.nonNullable $ E.text)
---       (E.param . E.nonNullable $ E.timestamptz)
---       (E.param . E.nullable $ E.text)
---       (E.param . E.nullable $ E.text)
---   roleEncoder =
---     contrazip4
---       (E.param . E.nonNullable $ E.uuid)
---       (E.param . E.nonNullable $ E.uuid)
---       (E.param . E.nonNullable $ E.text)
---       (E.param . E.nonNullable $ E.timestamptz)
---   bindParams' = bindParams 7
---   roleBindParams' = bindParams 4
---   query =
---     encodeUtf8
---       [trimming|
---                INSERT INTO users (identifier, display_name, email_address, password_hash, created_at, auth_token, description)
---                VALUES ( $bindParams' )
---                |]
---   roleQuery =
---     encodeUtf8
---       [trimming|
---              INSERT INTO user_roles (identifier, user_identifier, role_id, created_at)
---              VALUES( $roleBindParams' )
---     |]
+  newNew <- liftIO nextRandom
+  let u =
+        User'
+          { identifier = UUID.toText new,
+            displayName = name' ^. #value,
+            emailAddress = email ^. #value,
+            passwordHash = Just $ UUID.toText identifier,
+            passwordResetToken = Nothing,
+            createdAt = now,
+            authToken = Just (newToken now new),
+            latestLoginAt = Nothing,
+            latestLoginDevice = Nothing,
+            avatarUrl = Nothing,
+            lastEditedAt = Nothing,
+            description = desc
+          } ::
+          User'
+  let r =
+        UserRole'
+          { identifier = UUID.toText newNew,
+            userIdentifier = UserId . UUID.toText $ new,
+            roleId = T.pack . Relude.show $ role,
+            createdAt = now
+          } ::
+          UserRole'
+  liftIO
+    . runBeamSqliteDebug putStrLn (env ^. #conn)
+    . runInsert
+    . insert ((^. #users) wikiMusicDatabase)
+    $ insertValues [u]
+  liftIO
+    . runBeamSqliteDebug putStrLn (env ^. #conn)
+    . runInsert
+    . insert ((^. #userRoles) wikiMusicDatabase)
+    $ insertValues [r]
+  pure . Right . UUID.toText $ new
 
 doIfUserFoundByEmail :: (MonadIO m) => Env -> UserEmail -> (UUID -> m (Either UserCommandError a)) -> m (Either UserCommandError a)
 doIfUserFoundByEmail env email eff = do

@@ -20,7 +20,6 @@
 
 module WikiMusic.Beam.User where
 
-import Data.Map qualified as Map
 import Data.Text qualified as T
 import Database.Beam
 import Optics
@@ -39,7 +38,8 @@ data UserT f = User'
     latestLoginDevice :: C f (Maybe Text),
     avatarUrl :: C f (Maybe Text),
     createdAt :: C f UTCTime,
-    lastEditedAt :: C f (Maybe UTCTime)
+    lastEditedAt :: C f (Maybe UTCTime),
+    description :: C f (Maybe Text)
   }
   deriving (Generic, Beamable)
 
@@ -98,7 +98,7 @@ userRole = read . T.unpack
 mkUserM :: [Text] -> User' -> WikiMusicUser
 mkUserM roles x =
   WikiMusicUser
-    { identifier = x ^. #identifier,
+    { identifier = textToUUID $ x ^. #identifier,
       displayName = x ^. #displayName,
       emailAddress = x ^. #emailAddress,
       passwordHash = x ^. #passwordHash,

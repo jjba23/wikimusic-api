@@ -9,9 +9,8 @@ where
 
 import Control.Monad
 import Data.ByteString.Lazy qualified as BL
-import Data.Text (pack, unpack)
+import Data.Text qualified as T
 import Database.Beam
-import Database.Beam.Sqlite
 import Network.Wai.Handler.Warp
 import Network.Wai.Logger (ApacheLogger, withStdoutLogger)
 import Optics
@@ -32,7 +31,7 @@ boot = liftIO $ withStdoutLogger $ \logger' ->
     doRun logger' config = do
       startWikiMusicAPI logger' config
     cfg args = case nonEmpty args of
-      Just (x :| []) -> pack x
+      Just (x :| []) -> T.pack x
       _ -> "resources/config/run-local.toml"
 
 startWikiMusicAPI :: (MonadIO m) => ApacheLogger -> AppConfig -> m ()

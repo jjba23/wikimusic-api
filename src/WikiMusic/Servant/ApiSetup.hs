@@ -12,14 +12,12 @@ module WikiMusic.Servant.ApiSetup
   )
 where
 
-import Data.ByteString.Char8 qualified as C8
 import Data.OpenApi qualified
 import Data.Proxy
 import Data.Text (unpack)
 import Data.Text qualified as T
 import Database.Beam
-import Database.Beam.Sqlite
-import Database.Redis qualified as Redis
+import Database.SQLite.Simple qualified as Sqlite
 import Network.Wai
 import Network.Wai.Logger (ApacheLogger)
 import Network.Wai.Middleware.Cors
@@ -74,9 +72,9 @@ myCors cfg = cors (const $ Just policy)
         }
 
 mkApp :: (MonadIO m) => ApacheLogger -> AppConfig -> m Application
-mkApp logger' cfg pool redisConn = do
+mkApp logger' cfg = do
   now <- liftIO getCurrentTime
-  conn <- liftIO $ open (cfg ^. #sqlite ^. #path)
+  conn <- liftIO $ Sqlite.open (T.unpack $ cfg ^. #sqlite % #path)
   mailCss <- liftIO $ readFileBS "resources/css/mail.css"
 
   let env =

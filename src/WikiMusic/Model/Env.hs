@@ -9,7 +9,6 @@ module WikiMusic.Model.Env
 where
 
 import Data.Time
-import Database.Beam.Sqlite.Connection
 import Database.SQLite.Simple
 import Network.Wai.Logger (ApacheLogger)
 import Optics

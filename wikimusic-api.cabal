@@ -142,7 +142,6 @@ library
     , filepath
     , directory
     , uuid
-    , vector
     , wai
     , wai-cors
     , wai-extra

@@ -12,28 +12,21 @@ module WikiMusic.Protolude
     filterMap,
     filterText,
     module NeatInterpolation,
-    vectorToList,
-    V.Vector,
-    vectorFromList,
   )
 where
 
 import Contravariant.Extras.Contrazip
-import Data.Map (Map, elems, filter, filterWithKey, fromList, keys, mapWithKey, toList, (!?))
 import Data.Map qualified as Map
-import Data.Text (intercalate, pack, splitAt, strip, take, unpack, unwords, words)
 import Data.Text qualified as T
 import Data.Time (UTCTime (..), ZonedTime, getCurrentTime, secondsToDiffTime)
 import Data.UUID (UUID)
 import Data.UUID.V4 (nextRandom)
-import Data.Vector qualified as V
 import Free.AlaCarte
 import NeatInterpolation
 import Optics hiding (uncons)
 import Relude
 import WikiMusic.Model.Auth hiding (show)
 import WikiMusic.Model.Env
-import Prelude qualified
 
 mapMap :: (a -> b) -> Map k a -> Map k b
 mapMap = Map.map
@@ -41,11 +34,5 @@ mapMap = Map.map
 filterMap :: (a -> Bool) -> Map k a -> Map k a
 filterMap = Map.filter
 
-vectorToList :: V.Vector a -> [a]
-vectorToList = V.toList
-
 filterText :: (Char -> Bool) -> Text -> Text
 filterText = T.filter
-
-vectorFromList :: [a] -> V.Vector a
-vectorFromList = V.fromList
