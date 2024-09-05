@@ -1,5 +1,3 @@
-{-# LANGUAGE DeriveAnyClass #-}
-{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GADTs #-}
@@ -21,9 +19,9 @@ import Data.UUID qualified as UUID
 import Database.Beam
 import Database.Beam.Sqlite
 import Free.AlaCarte
-import NeatInterpolation
 import Optics
 import Relude
+import WikiMusic.Beam.Artist
 import WikiMusic.Beam.Database
 import WikiMusic.Beam.Song
 import WikiMusic.Beam.Util
@@ -38,18 +36,15 @@ instance Exec SongQuery where
     next =<< fetchSongs' env sortOrder limit offset
   execAlgebra (FetchSongsByUUID env sortOrder identifiers next) =
     next =<< fetchSongsByUUID' env sortOrder identifiers
-  execAlgebra (EnrichedSongResponse env songMap enrichSongParams next) = do
-    next =<< enrichedSongResponse' env songMap enrichSongParams
+  execAlgebra (EnrichedSongResponse env songMap enrichSongParams next) = next =<< enrichedSongResponse' env songMap enrichSongParams
   execAlgebra (FetchSongComments env identifiers next) =
     next =<< fetchSongComments' env identifiers
   execAlgebra (FetchSongOpinions env identifiers next) =
     next =<< fetchSongOpinions' env identifiers
   execAlgebra (FetchSongArtworks env identifiers next) =
     next =<< fetchSongArtworks' env identifiers
-  execAlgebra (FetchSongArtists env identifiers next) = do
-    next =<< fetchSongArtists' env identifiers
-  execAlgebra (SearchSongs env searchInput sortOrder limit offset next) = do
-    next =<< searchSongs' env searchInput sortOrder limit offset
+  execAlgebra (FetchSongArtists env identifiers next) = next =<< fetchSongArtists' env identifiers
+  execAlgebra (SearchSongs env searchInput sortOrder limit offset next) = next =<< searchSongs' env searchInput sortOrder limit offset
   execAlgebra (FetchSongContents env identifiers next) =
     next =<< fetchSongContents' env identifiers
 
@@ -62,8 +57,10 @@ mkOrderBy DescLastEditedAt = orderBy_ (desc_ . (^. #lastEditedAt))
 
 fetchSongs' :: (MonadIO m) => Env -> SongSortOrder -> Limit -> Offset -> m (Map UUID Song, [UUID])
 fetchSongs' env sortOrder (Limit limit) (Offset offset) = do
-  songs <- liftIO $ runBeamSqliteDebug putStrLn (env ^. #conn) $ do
-    runSelectReturningList
+  songs <-
+    liftIO
+      $ runBeamSqliteDebug putStrLn (env ^. #conn)
+      $ runSelectReturningList
       . select
       . offset_ (fromIntegral offset)
       . limit_ (fromIntegral limit)
@@ -101,30 +98,28 @@ fetchSongArtworks' env identifiers = do
 -- | Fetch song comments from storage
 fetchSongComments' :: (MonadIO m) => Env -> [UUID] -> m (Map UUID SongComment)
 fetchSongComments' env identifiers = do
-  comments <- liftIO $ runBeamSqliteDebug putStrLn (env ^. #conn) $ do
-    runSelectReturningList $ select $ do
-      songs <-
-        filter_ (\s -> (s ^. #identifier) `in_` map (val_ . UUID.toText) identifiers)
-          $ all_ ((^. #songs) wikiMusicDatabase)
-      oneToMany_ ((^. #songComments) wikiMusicDatabase) (^. #songIdentifier) songs
+  comments <- liftIO $ runBeamSqliteDebug putStrLn (env ^. #conn) $ runSelectReturningList $ select $ do
+    songs <-
+      filter_ (\s -> (s ^. #identifier) `in_` map (val_ . UUID.toText) identifiers)
+        $ all_ ((^. #songs) wikiMusicDatabase)
+    oneToMany_ ((^. #songComments) wikiMusicDatabase) (^. #songIdentifier) songs
 
   pure . Map.fromList . map toSongComment $ comments
 
 -- | Fetch song opinions from storage
 fetchSongOpinions' :: (MonadIO m) => Env -> [UUID] -> m (Map UUID SongOpinion)
 fetchSongOpinions' env identifiers = do
-  opinions <- liftIO $ runBeamSqliteDebug putStrLn (env ^. #conn) $ do
-    runSelectReturningList $ select $ do
-      songs <-
-        filter_ (\s -> (s ^. #identifier) `in_` map (val_ . UUID.toText) identifiers)
-          $ all_ ((^. #songs) wikiMusicDatabase)
-      oneToMany_ ((^. #songOpinions) wikiMusicDatabase) (^. #songIdentifier) songs
+  opinions <- liftIO $ runBeamSqliteDebug putStrLn (env ^. #conn) $ runSelectReturningList $ select $ do
+    songs <-
+      filter_ (\s -> (s ^. #identifier) `in_` map (val_ . UUID.toText) identifiers)
+        $ all_ ((^. #songs) wikiMusicDatabase)
+    oneToMany_ ((^. #songOpinions) wikiMusicDatabase) (^. #songIdentifier) songs
 
   pure . Map.fromList . map toSongOpinion $ opinions
 
 enrichedSongResponse' :: (MonadIO m) => Env -> Map UUID Song -> EnrichSongParams -> m (Map UUID Song)
 enrichedSongResponse' env songMap enrichSongParams = do
-  let isChildOf' p x = Just (p ^. #comment % #identifier) == (x ^. #comment % #parentIdentifier)
+  let isChildOf' p x = Just (p ^. #comment % #identifier) == x ^. #comment % #parentIdentifier
       songIds = keys songMap
       getComment =
         if enrichSongParams ^. #includeComments
@@ -155,7 +150,7 @@ enrichedSongResponse' env songMap enrichSongParams = do
 
   let matchesSongIdentifier song = (== song ^. #identifier) . (^. #songIdentifier)
   let enrichedSongs =
-        mapMap
+        Map.map
           ( \song -> do
               let rawCommentMap = Map.filter (matchesSongIdentifier song) commentMap
                   allComments = elems rawCommentMap
@@ -164,9 +159,9 @@ enrichedSongResponse' env songMap enrichSongParams = do
 
               song
                 { comments = commentThreads,
-                  contents = filterMap (matchesSongIdentifier song) contentMap,
-                  artworks = filterMap (matchesSongIdentifier song) artworkMap,
-                  opinions = filterMap (matchesSongIdentifier song) opinionMap,
+                  contents = Map.filter (matchesSongIdentifier song) contentMap,
+                  artworks = Map.filter (matchesSongIdentifier song) artworkMap,
+                  opinions = Map.filter (matchesSongIdentifier song) opinionMap,
                   artists = Map.fromList $ map (\(_, artistId, artistName) -> (artistId, artistName)) relevantArtists
                 }
           )
@@ -174,27 +169,33 @@ enrichedSongResponse' env songMap enrichSongParams = do
   pure enrichedSongs
 
 fetchSongArtists' :: (MonadIO m) => Env -> [UUID] -> m [(UUID, UUID, Text)]
-fetchSongArtists' env identifiers = pure []
-
--- let stmt = Statement query encoder decoder True
---     query =
---       "SELECT song_artists.song_identifier, artists.identifier, artists.display_name FROM song_artists \
---       \ INNER JOIN artists ON song_artists.artist_identifier = artists.identifier \
---       \ WHERE song_identifier = ANY($1)"
---     encoder =
---       E.param . E.nonNullable $ (E.foldableArray . E.nonNullable $ E.uuid)
---     decoder = D.rowVector vector
---     vector =
---       (,,)
---         <$> D.column (D.nonNullable D.uuid)
---         <*> D.column (D.nonNullable D.uuid)
---         <*> D.column (D.nonNullable D.text)
-
--- ReadAbstraction.persistenceReadCall
---   (env ^. #pool)
---   (Session.statement identifiers stmt)
---   fromList
---   V.toList
+fetchSongArtists' env identifiers = do
+  songArtists <-
+    liftIO
+      . runBeamSqliteDebug putStrLn (env ^. #conn)
+      . runSelectReturningList
+      . select
+      . orderBy_ (asc_ . (^. #createdAt))
+      $ filter_ (\s -> (s ^. #songIdentifier) `in_` map (val_ . SongId . UUID.toText) identifiers)
+      $ all_ ((^. #songArtists) wikiMusicDatabase)
+  artists <-
+    liftIO
+      . runBeamSqliteDebug putStrLn (env ^. #conn)
+      . runSelectReturningList
+      . select
+      . orderBy_ (asc_ . (^. #displayName))
+      $ filter_ (\s -> (s ^. #identifier) `in_` map (val_ . fromArtistPk . (^. #artistIdentifier)) songArtists)
+      $ all_ ((^. #artists) wikiMusicDatabase)
+  let artistMap = Map.fromList $ map (\a -> (a ^. #identifier, a ^. #displayName)) artists
+  pure
+    $ map
+      ( \sa ->
+          ( textToUUID $ fromSongPk $ sa ^. #songIdentifier,
+            textToUUID $ fromArtistPk $ sa ^. #artistIdentifier,
+            fromMaybe "" $ artistMap Map.!? fromArtistPk (sa ^. #artistIdentifier)
+          )
+      )
+      songArtists
 
 searchSongs' :: (MonadIO m) => Env -> SearchInput -> SongSortOrder -> Limit -> Offset -> m (Map UUID Song, [UUID])
 searchSongs' env searchInput sortOrder (Limit limit) (Offset offset) = do
@@ -221,17 +222,12 @@ fetchSongContents' env identifiers = do
       $ all_ ((^. #songContents) wikiMusicDatabase)
   pure $ Map.fromList $ map (\x -> (textToUUID $ x ^. #identifier, mkSongContentsM x)) contents
 
--- import WikiMusic.Protolude
-mapMap :: (a -> b) -> Map k a -> Map k b
-mapMap = Map.map
-
-filterMap :: (a -> Bool) -> Map k a -> Map k a
-filterMap = Map.filter
-
 filledSongs :: (MonadIO m) => Env -> [Song'] -> m (Map UUID Song, [UUID])
 filledSongs env songs = do
-  externalSources <- liftIO $ runBeamSqliteDebug putStrLn (env ^. #conn) $ do
-    runSelectReturningList
+  externalSources <-
+    liftIO
+      $ runBeamSqliteDebug putStrLn (env ^. #conn)
+      $ runSelectReturningList
       . select
       . filter_ (\s -> (s ^. #songIdentifier) `in_` map (val_ . (\x -> SongId $ x ^. #identifier)) songs)
       $ all_ ((^. #songExternalSources) wikiMusicDatabase)
@@ -242,5 +238,5 @@ filledSongs env songs = do
       let maybeFoundExternal =
             fmap
               (fromPersistenceExternalSource . head)
-              (nonEmpty $ filter (\x -> fromSongPk (x ^. #songIdentifier) == (song ^. #identifier)) externalSources)
+              (nonEmpty $ filter (\x -> fromSongPk (x ^. #songIdentifier) == song ^. #identifier) externalSources)
        in toSong song (fromMaybe emptyExternalSources maybeFoundExternal)

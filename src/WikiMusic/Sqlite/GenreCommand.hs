@@ -313,16 +313,6 @@ deleteGenreOpinions' env identifiers = do
       (\c -> (c ^. #identifier) `in_` map (val_ . UUID.toText) identifiers)
   pure . Right $ ()
 
-deleteCommentsOfGenres' :: (MonadIO m) => Env -> [UUID] -> m (Either GenreCommandError ())
-deleteCommentsOfGenres' env identifiers = do
-  liftIO
-    . runBeamSqliteDebug putStrLn (env ^. #conn)
-    . runDelete
-    $ delete
-      ((^. #genreComments) wikiMusicDatabase)
-      (\c -> (c ^. #genreIdentifier) `in_` map (val_ . GenreId . UUID.toText) identifiers)
-  pure . Right $ ()
-
 incrementViewsByOne' :: (MonadIO m) => Env -> [UUID] -> m (Either GenreCommandError ())
 incrementViewsByOne' env identifiers = do
   mapM_ doUpdate identifiers

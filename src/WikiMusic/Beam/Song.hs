@@ -26,7 +26,6 @@ import Database.Beam
 import Optics
 import Relude
 import WikiMusic.Beam.Util
-import WikiMusic.Model.Artwork
 import WikiMusic.Model.Song
 import WikiMusic.Protolude
 
@@ -101,7 +100,7 @@ toPersistenceSong x =
       displayName = x ^. #displayName,
       createdBy = UUID.toText $ x ^. #createdBy,
       visibilityStatus = fromIntegral $ x ^. #visibilityStatus,
-      approvedBy = fmap (UUID.toText) (x ^. #approvedBy),
+      approvedBy = fmap UUID.toText (x ^. #approvedBy),
       createdAt = x ^. #createdAt,
       lastEditedAt = x ^. #lastEditedAt,
       viewCount = fromIntegral $ x ^. #viewCount,

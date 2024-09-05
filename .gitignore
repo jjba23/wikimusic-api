@@ -7,4 +7,5 @@ dist-newstyle/
 result
 .direnv/
 resources/secrets
+resources/*.sqlite
 *.sqlite

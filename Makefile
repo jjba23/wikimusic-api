@@ -5,10 +5,10 @@ fmt:
 	find . -name '*.nix' -exec nixfmt {} \;
 	-statix check
 	-deadnix -f
-# dev: fmt
-# 	ghcid --warnings --restart=./wikimusic-api.cabal --test "WikiMusic.Boot.boot"
 dev: fmt
-	nix run -L .#
+	ghcid --warnings --restart=./wikimusic-api.cabal --test "WikiMusic.Boot.boot"
+# dev: fmt
+# 	nix run -L .#
 run-production:
 	nix run -L . -- "./resources/config/run-production.toml"
 test:
