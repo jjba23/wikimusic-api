@@ -16,8 +16,8 @@ import WikiMusic.Free.UserQuery
 import WikiMusic.Interaction.Model.User
 import WikiMusic.Interaction.User
 import WikiMusic.Model.Env
-import WikiMusic.PostgreSQL.UserCommand ()
-import WikiMusic.PostgreSQL.UserQuery ()
+import WikiMusic.SQLite.UserCommand ()
+import WikiMusic.SQLite.UserQuery ()
 import WikiMusic.Protolude
 import WikiMusic.SMTP.MailCommandSES ()
 import WikiMusic.Servant.Utilities

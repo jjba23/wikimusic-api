@@ -9,7 +9,7 @@
 {-# OPTIONS_GHC -fno-warn-ambiguous-fields #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
-module WikiMusic.PostgreSQL.SongCommand () where
+module WikiMusic.SQLite.SongCommand () where
 
 import Data.Map qualified as Map
 import Data.Text (pack)
@@ -29,8 +29,6 @@ import WikiMusic.Model.Artwork
 import WikiMusic.Model.Comment
 import WikiMusic.Model.Opinion
 import WikiMusic.Model.Song
-import WikiMusic.PostgreSQL.ReadAbstraction
-import WikiMusic.PostgreSQL.WriteAbstraction
 import WikiMusic.Protolude
 import Prelude qualified
 

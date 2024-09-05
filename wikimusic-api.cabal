@@ -68,16 +68,16 @@ library
       WikiMusic.Beam.Relations
       
       -- λ postgresql implementations
-      WikiMusic.PostgreSQL.ArtistCommand
-      WikiMusic.PostgreSQL.ArtistQuery
-      WikiMusic.PostgreSQL.AuthQuery
-      WikiMusic.PostgreSQL.GenreCommand
-      WikiMusic.PostgreSQL.GenreQuery
-      WikiMusic.PostgreSQL.Migration
-      WikiMusic.PostgreSQL.SongCommand
-      WikiMusic.PostgreSQL.SongQuery
-      WikiMusic.PostgreSQL.UserQuery
-      WikiMusic.PostgreSQL.UserCommand
+      WikiMusic.SQLite.ArtistCommand
+      WikiMusic.SQLite.ArtistQuery
+      WikiMusic.SQLite.AuthQuery
+      WikiMusic.SQLite.GenreCommand
+      WikiMusic.SQLite.GenreQuery
+      WikiMusic.SQLite.Migration
+      WikiMusic.SQLite.SongCommand
+      WikiMusic.SQLite.SongQuery
+      WikiMusic.SQLite.UserQuery
+      WikiMusic.SQLite.UserCommand
       
       -- λ clock
       WikiMusic.Clock.LiveClock
@@ -159,7 +159,7 @@ library
     , wikimusic-api-spec
     , word8
     , beam-core
-    , beam-postgres
+    , beam-sqlite
     , beam-migrate
   default-language: GHC2021
 

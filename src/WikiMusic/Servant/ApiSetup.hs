@@ -91,7 +91,7 @@ mkApp logger' cfg pool redisConn = do
 
   let env =
         Env
-          { pool = pool,
+          { 
             cfg = cfg,
             processStartedAt = now,
             logger = logger',

@@ -9,7 +9,7 @@
 {-# OPTIONS_GHC -fno-warn-missing-signatures #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
-module WikiMusic.PostgreSQL.GenreQuery () where
+module WikiMusic.SQLite.GenreQuery () where
 
 import Data.Map (elems, keys)
 import Data.Map qualified as Map

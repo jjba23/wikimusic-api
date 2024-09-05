@@ -4,7 +4,7 @@
 {-# LANGUAGE NoFieldSelectors #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
-module WikiMusic.PostgreSQL.UserQuery () where
+module WikiMusic.SQLite.UserQuery () where
 
 import Data.Function (on)
 import Data.List (groupBy, sortBy)

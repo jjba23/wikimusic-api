@@ -4,7 +4,7 @@
 {-# LANGUAGE NoFieldSelectors #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
-module WikiMusic.PostgreSQL.AuthQuery () where
+module WikiMusic.SQLite.AuthQuery () where
 
 import Database.Beam
 import Database.Beam.Postgres

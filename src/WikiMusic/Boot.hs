@@ -19,7 +19,7 @@ import Optics
 import Relude
 import WikiMusic.Config
 import WikiMusic.Model.Config
-import WikiMusic.PostgreSQL.Migration
+import WikiMusic.SQLite.Migration
 import WikiMusic.Servant.ApiSetup
 
 boot :: (MonadIO m) => m ()
@@ -32,9 +32,7 @@ boot = liftIO $ withStdoutLogger $ \logger' ->
   where
     crashWithBadConfig e = error ("Bad config could not be parsed! " <> show e)
     doRun logger' config = do
-      pool <- makePostgresPool config
-      redisConn <- makeRedisConn config
-      startWikiMusicAPI logger' config pool redisConn
+      startWikiMusicAPI logger' config
     cfg args = case nonEmpty args of
       Just (x :| []) -> pack x
       _ -> "resources/config/run-local.toml"
@@ -43,7 +41,7 @@ startWikiMusicAPI :: (MonadIO m) => ApacheLogger -> AppConfig -> Hasql.Pool.Pool
 startWikiMusicAPI logger' cfg pool redisConn = do
   maybeRunMigrations
   liftIO . BL.putStr $ "Starting REST API ..."
-  liftIO $ runSettings apiSettings =<< mkApp logger' cfg pool redisConn
+  liftIO $ runSettings apiSettings =<< mkApp logger' cfg
   where
     apiSettings = setPort (cfg ^. #servant % #port) defaultSettings
     maybeRunMigrations = do
@@ -53,30 +51,3 @@ startWikiMusicAPI logger' cfg pool redisConn = do
         liftIO . BL.putStr . fromString . show $ ex
         pure ()
 
-makeRedisConn :: (MonadIO m) => AppConfig -> m Redis.Connection
-makeRedisConn cfg = liftIO $ Redis.checkedConnect redisConnectionSettings
-  where
-    redisConnectionSettings =
-      Redis.defaultConnectInfo
-        { Redis.connectPort = Redis.PortNumber (fromIntegral $ cfg ^. #redis % #port),
-          Redis.connectAuth = fmap (fromString . unpack) (cfg ^. #redis % #password)
-        }
-
-makePostgresPool :: (MonadIO m) => AppConfig -> m Hasql.Pool.Pool
-makePostgresPool cfg = do
-  pool <- liftIO $ Hasql.Pool.acquire poolSize 10 10 10 dbConnectionSettings
-
-  let healthSess = Hasql.Session.sql "SELECT 1"
-  s <- liftIO $ Hasql.Pool.use pool healthSess
-  either (liftIO . BL.putStr . fromString . show) pure s
-
-  pure pool
-  where
-    poolSize = cfg ^. #postgresql % #poolSize
-    dbConnectionSettings =
-      Hasql.Connection.settings
-        (fromString . unpack $ cfg ^. #postgresql % #host)
-        (fromIntegral $ cfg ^. #postgresql % #port)
-        (fromString . unpack $ cfg ^. #postgresql % #user)
-        (maybe "" (fromString . unpack) (cfg ^. #postgresql % #password))
-        (fromString . unpack $ cfg ^. #postgresql % #name)

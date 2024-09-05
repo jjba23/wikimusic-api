@@ -6,7 +6,7 @@
 {-# OPTIONS_GHC -fno-warn-ambiguous-fields #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
-module WikiMusic.PostgreSQL.ArtistCommand () where
+module WikiMusic.SQLite.ArtistCommand () where
 
 import Data.Map qualified as Map
 import Data.Text (pack)
@@ -21,7 +21,6 @@ import WikiMusic.Model.Artist
 import WikiMusic.Model.Artwork
 import WikiMusic.Model.Comment
 import WikiMusic.Model.Opinion
-import WikiMusic.PostgreSQL.WriteAbstraction
 import WikiMusic.Protolude
 
 insertArtists' :: (MonadIO m) => Env -> [Artist] -> m ()

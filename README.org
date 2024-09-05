@@ -1,13 +1,13 @@
 #+title: WikiMusic API
 
-API and Persistence layer to PostgreSQL for WikiMusic, the invite-only private knowledge sharing of music community.
+API and Persistence layer to SQLite for WikiMusic, the invite-only private knowledge sharing of music community.
 
 /WikiMusic/
 
 #+begin_html
 <div>
 <img src="https://img.shields.io/badge/Haskell-5D4F85?logo=haskell&logoColor=fff&style=plastic" alt="Haskell"/>
-<img src="https://img.shields.io/badge/PostgreSQL-4169E1?logo=postgresql&logoColor=fff&style=plastic" alt="PostgreSQL"/>
+<img src="https://img.shields.io/badge/SQLite-4169E1?logo=postgresql&logoColor=fff&style=plastic" alt="SQLite"/>
 <img src="https://img.shields.io/badge/GNU%20Emacs-7F5AB6?logo=gnuemacs&logoColor=fff&style=plastic" alt="GNU Emacs"/>
 <img src="https://img.shields.io/badge/NixOS-5277C3?logo=nixos&logoColor=fff&style=plastic" alt="NixOS"/>
 <img src="https://img.shields.io/badge/Redis-DC382D?logo=redis&logoColor=fff&style=plastic" alt="Redis"/>
@@ -58,7 +58,7 @@ Otherwise, on systems like Void Linux :
 sudo xbps-install zlib zlib-devel libpqxx-devel postgresql-libs postgresql-libs-devel ncurses-libtinfo-devel
 #+end_src
 
-You will also need a PostgreSQL database to be accessible from WikiMusic API and running.
+You will also need a SQLite database to be accessible from WikiMusic API and running.
 
 WikiMusic will take care of the database schema migrations for you.
 
@@ -138,7 +138,7 @@ For local runs you can take a look at [[file:resources/config/run-local.toml]].
   I1 [ label="api.wikimusic.jointhefreeworld.org via HTTPS" ]
   I2 [ label="AWS Cloudfront" ]
   I3 [ label="AWS EC2 t3.small instance\nrunning NixOS" ]
-  I4 [ label="Haskell + Servant + PostgreSQL + Redis" ]
+  I4 [ label="Haskell + Servant + SQLite + Redis" ]
   I5 [ label="GitLab CI/CD" ]
   I6 [ label="AWS SQS queue" ]
 
@@ -178,8 +178,8 @@ Find below a list ideas and work being done on this project by all our contribut
 *** TODO Ensure all data models are validated in requests
 *** TODO Use more non-empty types and sets if possible
 *** TODO Remove unused dependencies
-*** TODO Create black box tests for basic system functioning (with PostgreSQL container)
-****  Create PostgreSQL assertion DSL for tests with Beam (check row exists)
+*** TODO Create black box tests for basic system functioning (with SQLite container)
+****  Create SQLite assertion DSL for tests with Beam (check row exists)
 *** TODO Genre <> Song <> Artist relation
 *** TODO Drop SQL tables of user favourites, since opinions table will be used for it
 *** TODO Add forums 

@@ -20,7 +20,7 @@ import WikiMusic.Free.AuthQuery
 import WikiMusic.Model.Auth
 import WikiMusic.Model.Env
 import WikiMusic.Model.Other
-import WikiMusic.PostgreSQL.AuthQuery ()
+import WikiMusic.SQLite.AuthQuery ()
 import WikiMusic.Protolude
 
 loginRoute ::

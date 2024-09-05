@@ -6,7 +6,7 @@
 {-# OPTIONS_GHC -fno-warn-ambiguous-fields #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
-module WikiMusic.PostgreSQL.GenreCommand () where
+module WikiMusic.SQLite.GenreCommand () where
 
 import Data.Map qualified as Map
 import Data.Text (pack)
@@ -22,7 +22,6 @@ import WikiMusic.Model.Artwork
 import WikiMusic.Model.Comment
 import WikiMusic.Model.Genre
 import WikiMusic.Model.Opinion
-import WikiMusic.PostgreSQL.WriteAbstraction
 import WikiMusic.Protolude
 
 insertGenres' :: (MonadIO m) => Env -> [Genre] -> m (Map UUID Genre)

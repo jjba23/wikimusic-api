@@ -25,8 +25,8 @@ import WikiMusic.Free.ArtistQuery
 import WikiMusic.Interaction.Model.Artist
 import WikiMusic.Model.Artist
 import WikiMusic.Model.Other
-import WikiMusic.PostgreSQL.ArtistCommand ()
-import WikiMusic.PostgreSQL.ArtistQuery ()
+import WikiMusic.SQLite.ArtistCommand ()
+import WikiMusic.SQLite.ArtistQuery ()
 import WikiMusic.Protolude
 
 fetchArtistsAction ::
