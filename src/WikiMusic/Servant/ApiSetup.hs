@@ -18,7 +18,7 @@ import Data.Proxy
 import Data.Text (unpack)
 import Data.Text qualified as T
 import Database.Beam
-import Database.Beam.Postgres
+import Database.Beam.Sqlite
 import Database.Redis qualified as Redis
 import Network.Wai
 import Network.Wai.Logger (ApacheLogger)

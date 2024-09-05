@@ -11,14 +11,14 @@
 {-# OPTIONS_GHC -fno-warn-ambiguous-fields #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
-module WikiMusic.SQLite.UserCommand () where
+module WikiMusic.Sqlite.UserCommand () where
 
 import Data.ByteString.Base64 qualified
 import Data.Password.Bcrypt
 import Data.Text (pack)
 import Data.UUID.V4
 import Database.Beam
-import Database.Beam.Postgres
+import Database.Beam.Sqlite
 import Hasql.Decoders as D
 import Hasql.Encoders as E
 import Hasql.Pool qualified

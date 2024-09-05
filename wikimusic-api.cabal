@@ -68,15 +68,15 @@ library
       WikiMusic.Beam.Relations
       
       -- λ postgresql implementations
-      WikiMusic.SQLite.ArtistCommand
-      WikiMusic.SQLite.ArtistQuery
-      WikiMusic.SQLite.AuthQuery
-      WikiMusic.SQLite.GenreCommand
-      WikiMusic.SQLite.GenreQuery
-      WikiMusic.SQLite.SongCommand
-      WikiMusic.SQLite.SongQuery
-      WikiMusic.SQLite.UserQuery
-      WikiMusic.SQLite.UserCommand
+      WikiMusic.Sqlite.ArtistCommand
+      WikiMusic.Sqlite.ArtistQuery
+      WikiMusic.Sqlite.AuthQuery
+      WikiMusic.Sqlite.GenreCommand
+      WikiMusic.Sqlite.GenreQuery
+      WikiMusic.Sqlite.SongCommand
+      WikiMusic.Sqlite.SongQuery
+      WikiMusic.Sqlite.UserQuery
+      WikiMusic.Sqlite.UserCommand
       
       -- λ clock
       WikiMusic.Clock.LiveClock

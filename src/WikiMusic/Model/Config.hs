@@ -6,7 +6,7 @@
 
 module WikiMusic.Model.Config
   ( AppConfig (..),
-    SQLiteConfig (..),
+    SqliteConfig (..),
     RedisConfig (..),
     ServantConfig (..),
     CorsConfig (..),
@@ -20,7 +20,7 @@ import Optics
 import Relude
 import Toml
 
-data SQLiteConfig = SQLiteConfig
+data SqliteConfig = SqliteConfig
   { user :: Text,
     passwordFile :: Text,
     password :: Maybe Text,
@@ -32,9 +32,9 @@ data SQLiteConfig = SQLiteConfig
   }
   deriving (Generic, Eq, Show)
 
-postgreSQLConfigCodec :: TomlCodec SQLiteConfig
+postgreSQLConfigCodec :: TomlCodec SqliteConfig
 postgreSQLConfigCodec =
-  SQLiteConfig
+  SqliteConfig
     <$> Toml.text "user"
     .= (^. #user)
     <*> Toml.text "password-file"
@@ -153,7 +153,7 @@ devCodec = DevConfig <$> Toml.text "reported-version" .= (^. #reportedVersion)
 
 data AppConfig = AppConfig
   { servant :: ServantConfig,
-    postgresql :: SQLiteConfig,
+    postgresql :: SqliteConfig,
     redis :: RedisConfig,
     cors :: CorsConfig,
     mail :: MailConfig,
@@ -181,7 +181,7 @@ appConfigCodec =
     .= (^. #dev)
 
 makeFieldLabelsNoPrefix ''AppConfig
-makeFieldLabelsNoPrefix ''SQLiteConfig
+makeFieldLabelsNoPrefix ''SqliteConfig
 makeFieldLabelsNoPrefix ''RedisConfig
 makeFieldLabelsNoPrefix ''ServantConfig
 makeFieldLabelsNoPrefix ''CorsConfig

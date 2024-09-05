@@ -4,14 +4,14 @@
 {-# LANGUAGE NoFieldSelectors #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
-module WikiMusic.SQLite.UserQuery () where
+module WikiMusic.Sqlite.UserQuery () where
 
 import Data.Function (on)
 import Data.List (groupBy, sortBy)
 import Data.List.NonEmpty qualified as NE
 import Data.Ord (comparing)
 import Database.Beam
-import Database.Beam.Postgres
+import Database.Beam.Sqlite
 import Optics
 import Relude
 import WikiMusic.Beam.Database

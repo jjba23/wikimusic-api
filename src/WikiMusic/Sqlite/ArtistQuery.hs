@@ -9,12 +9,12 @@
 {-# OPTIONS_GHC -fno-warn-missing-signatures #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
-module WikiMusic.SQLite.ArtistQuery () where
+module WikiMusic.Sqlite.ArtistQuery () where
 
 import Data.Map (elems, keys)
 import Data.Map qualified as Map
 import Database.Beam
-import Database.Beam.Postgres
+import Database.Beam.Sqlite
 import WikiMusic.Beam.Artist
 import WikiMusic.Beam.Database
 import WikiMusic.Beam.Util

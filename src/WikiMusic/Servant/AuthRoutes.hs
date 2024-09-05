@@ -12,7 +12,7 @@ import WikiMusic.Free.AuthQuery
 import WikiMusic.Interaction.Auth
 import WikiMusic.Interaction.Model.Auth
 import WikiMusic.Model.Env
-import WikiMusic.SQLite.AuthQuery ()
+import WikiMusic.Sqlite.AuthQuery ()
 import WikiMusic.Protolude
 import WikiMusic.Servant.Utilities
 

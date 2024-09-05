@@ -11,7 +11,7 @@ import Control.Monad
 import Data.ByteString.Lazy qualified as BL
 import Data.Text (pack, unpack)
 import Database.Beam
-import Database.Beam.Postgres
+import Database.Beam.Sqlite
 import Database.Redis qualified as Redis
 import Network.Wai.Handler.Warp
 import Network.Wai.Logger (ApacheLogger, withStdoutLogger)

@@ -9,7 +9,7 @@ module WikiMusic.Model.Env
 where
 
 import Data.Time
-import Database.Beam.Postgres (Connection)
+import Database.Beam.Sqlite (Connection)
 import Hasql.Pool qualified
 import Network.Wai.Logger (ApacheLogger)
 import Optics

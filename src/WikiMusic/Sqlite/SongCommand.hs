@@ -9,12 +9,12 @@
 {-# OPTIONS_GHC -fno-warn-ambiguous-fields #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
-module WikiMusic.SQLite.SongCommand () where
+module WikiMusic.Sqlite.SongCommand () where
 
 import Data.Map qualified as Map
 import Data.Text (pack)
 import Database.Beam
-import Database.Beam.Postgres
+import Database.Beam.Sqlite
 import Hasql.Decoders as D
 import Hasql.Encoders as E
 import Hasql.Pool qualified

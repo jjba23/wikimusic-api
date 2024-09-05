@@ -6,12 +6,12 @@
 {-# OPTIONS_GHC -fno-warn-ambiguous-fields #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
-module WikiMusic.SQLite.GenreCommand () where
+module WikiMusic.Sqlite.GenreCommand () where
 
 import Data.Map qualified as Map
 import Data.Text (pack)
 import Database.Beam
-import Database.Beam.Postgres
+import Database.Beam.Sqlite
 import Hasql.Pool qualified
 import Relude
 import WikiMusic.Beam.Database

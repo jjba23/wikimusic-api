@@ -4,10 +4,10 @@
 {-# LANGUAGE NoFieldSelectors #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
-module WikiMusic.SQLite.AuthQuery () where
+module WikiMusic.Sqlite.AuthQuery () where
 
 import Database.Beam
-import Database.Beam.Postgres
+import Database.Beam.Sqlite
 import Relude
 import WikiMusic.Beam.Database
 import WikiMusic.Beam.User

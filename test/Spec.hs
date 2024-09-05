@@ -67,19 +67,19 @@ main =
     $ \start ->
       Tasty.testGroup
         "Some test group"
-        [ Tasty.testCase "Redis + SQLite test" $ do
+        [ Tasty.testCase "Redis + Sqlite test" $ do
             -- Actually start the containers!!
             TestConfig {..} <- start
             -- ... assert some properties
             pure (),
-          Tasty.testCase "Another Redis + SQLite test" $ do
+          Tasty.testCase "Another Redis + Sqlite test" $ do
             -- Invoking `start` twice gives the same Endpoints!
             TestConfig {..} <- start
             (code, stdout, stderr) <- readProcess "ls -l /home" -- >>= BL.putStr
             _ <- BL.putStr stdout
             -- ... assert some properties
             pure (),
-          Tasty.testCase "Another Redis + SQLite test 2" $ do
+          Tasty.testCase "Another Redis + Sqlite test 2" $ do
             -- Invoking `start` twice gives the same Endpoints!
             TestConfig {..} <- start
             (code, stdout, stderr) <- readProcess "timeout 20s make dev" -- >>= BL.putStr

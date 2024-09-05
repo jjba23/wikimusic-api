@@ -25,8 +25,8 @@ import WikiMusic.Free.GenreQuery
 import WikiMusic.Interaction.Model.Genre
 import WikiMusic.Model.Genre
 import WikiMusic.Model.Other
-import WikiMusic.SQLite.GenreCommand ()
-import WikiMusic.SQLite.GenreQuery ()
+import WikiMusic.Sqlite.GenreCommand ()
+import WikiMusic.Sqlite.GenreQuery ()
 import WikiMusic.Protolude
 
 fetchGenresAction ::

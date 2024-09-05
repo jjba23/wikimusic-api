@@ -16,14 +16,14 @@
 {-# OPTIONS_GHC -fno-warn-missing-signatures #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
-module WikiMusic.SQLite.SongQuery () where
+module WikiMusic.Sqlite.SongQuery () where
 
 import Data.Map (elems, keys)
 import Data.Map qualified as Map
 import Data.UUID
 import Data.Vector qualified as V
 import Database.Beam
-import Database.Beam.Postgres
+import Database.Beam.Sqlite
 import Free.AlaCarte
 import Hasql.Decoders as D
 import Hasql.Encoders as E
