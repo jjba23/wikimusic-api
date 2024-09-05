@@ -73,7 +73,6 @@ library
       WikiMusic.SQLite.AuthQuery
       WikiMusic.SQLite.GenreCommand
       WikiMusic.SQLite.GenreQuery
-      WikiMusic.SQLite.Migration
       WikiMusic.SQLite.SongCommand
       WikiMusic.SQLite.SongQuery
       WikiMusic.SQLite.UserQuery

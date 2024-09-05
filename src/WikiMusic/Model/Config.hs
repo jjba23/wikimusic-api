@@ -26,9 +26,9 @@ data SQLiteConfig = SQLiteConfig
     password :: Maybe Text,
     port :: Int,
     name :: Text,
-    poolSize :: Int,
+    
     host :: Text,
-    runMigrations :: Bool
+    
   }
   deriving (Generic, Eq, Show)
 

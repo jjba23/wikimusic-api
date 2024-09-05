@@ -19,7 +19,6 @@ import Optics
 import Relude
 import WikiMusic.Config
 import WikiMusic.Model.Config
-import WikiMusic.SQLite.Migration
 import WikiMusic.Servant.ApiSetup
 
 boot :: (MonadIO m) => m ()
@@ -38,16 +37,9 @@ boot = liftIO $ withStdoutLogger $ \logger' ->
       _ -> "resources/config/run-local.toml"
 
 startWikiMusicAPI :: (MonadIO m) => ApacheLogger -> AppConfig -> Hasql.Pool.Pool -> Redis.Connection -> m ()
-startWikiMusicAPI logger' cfg pool redisConn = do
-  maybeRunMigrations
+startWikiMusicAPI logger' cfg pool redisConn = do  
   liftIO . BL.putStr $ "Starting REST API ..."
   liftIO $ runSettings apiSettings =<< mkApp logger' cfg
   where
     apiSettings = setPort (cfg ^. #servant % #port) defaultSettings
-    maybeRunMigrations = do
-      when (cfg ^. #postgresql % #runMigrations) $ do
-        liftIO . BL.putStr $ "Starting database migrations ..."
-        ex <- liftIO . runWikiMusicMigrations $ pool
-        liftIO . BL.putStr . fromString . show $ ex
-        pure ()
 
