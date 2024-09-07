@@ -35,6 +35,9 @@ import WikiMusic.Servant.GenreRoutes
 import WikiMusic.Servant.SongRoutes
 import WikiMusic.Servant.UserRoutes
 import WikiMusic.Servant.Utilities
+import qualified Prometheus.Metric.GHC as P
+import qualified Prometheus as P
+import qualified Network.Wai.Middleware.Prometheus as P
 
 swagger :: Servant.Handler Data.OpenApi.OpenApi
 swagger = pure $ toOpenApi docsProxy
@@ -96,6 +99,7 @@ mkApp logger' cfg = do
   pure
     . (if (cfg ^. #dev % #reportedVersion) == "dev" then logStdoutDev else logStdout)
     . myCors (cfg ^. #cors)
+    . P.prometheus P.def
     $ serveWithContext apiProxy apiCfg apiItself
 
 wiredUpPrivateServer :: Env -> Server PrivateAPI

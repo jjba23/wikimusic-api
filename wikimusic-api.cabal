@@ -1,7 +1,7 @@
 cabal-version: 1.12
 
 name:           wikimusic-api
-version:        1.2.0.2
+version:        1.2.0.3
 description:    Please see the README at <https://gitlab.com/jjba-projects/wikimusic-api>
 homepage:       https://gitlab.com/jjba-projects/wikimusic-api
 bug-reports:    https://gitlab.com/jjba-projects/wikimusic-api/-/issues
@@ -147,6 +147,9 @@ library
     , wai-extra
     , wai-logger
     , warp
+    , prometheus-client
+    , prometheus-metrics-ghc
+    , wai-middleware-prometheus
     , smtp-mail
     , mime-mail
     , base64-bytestring
@@ -169,7 +172,7 @@ executable wikimusic-api-exe
       Paths_wikimusic_api
   hs-source-dirs:
       app
-  ghc-options: -Wall -threaded -rtsopts -with-rtsopts=-N
+  ghc-options: -Wall -threaded -rtsopts "-with-rtsopts=-T -N"
   default-extensions:
       DataKinds
       DefaultSignatures
@@ -204,7 +207,7 @@ test-suite spec
       Paths_wikimusic_api
   hs-source-dirs:
       test
-  ghc-options: -Wall -threaded -rtsopts -with-rtsopts=-N
+  ghc-options: -Wall -threaded -rtsopts "-with-rtsopts=-T -N"
   default-extensions:
       DataKinds
       DefaultSignatures
