@@ -54,8 +54,8 @@ fetchArtists' env sortOrder (Limit limit) (Offset offset) = do
   artists <- liftIO $ runBeamSqliteDebug putStrLn (env ^. #conn) $ do
     runSelectReturningList
       . select
-      . offset_ (fromIntegral offset)
       . limit_ (fromIntegral limit)
+      . offset_ (fromIntegral offset)
       . mkOrderBy sortOrder
       $ all_ ((^. #artists) wikiMusicDatabase)
   filledArtists env artists
@@ -148,8 +148,8 @@ searchArtists' env searchInput sortOrder (Limit limit) (Offset offset) = do
       . runSelectReturningList
       . select
       . filter_ (\s -> (s ^. #displayName) `like_` val_ ("%" <> searchInput ^. #value <> "%"))
-      . offset_ (fromIntegral offset)
       . limit_ (fromIntegral limit)
+      . offset_ (fromIntegral offset)
       . mkOrderBy sortOrder
       $ all_ ((^. #artists) wikiMusicDatabase)
   filledArtists env artists

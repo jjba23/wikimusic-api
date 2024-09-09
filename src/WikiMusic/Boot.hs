@@ -14,12 +14,12 @@ import Database.Beam
 import Network.Wai.Handler.Warp
 import Network.Wai.Logger (ApacheLogger, withStdoutLogger)
 import Optics
+import Prometheus qualified as P
+import Prometheus.Metric.GHC qualified as P
 import Relude
 import WikiMusic.Config
 import WikiMusic.Model.Config
 import WikiMusic.Servant.ApiSetup
-import qualified Prometheus.Metric.GHC as P
-import qualified Prometheus as P
 
 boot :: (MonadIO m) => m ()
 boot = liftIO $ withStdoutLogger $ \logger' ->

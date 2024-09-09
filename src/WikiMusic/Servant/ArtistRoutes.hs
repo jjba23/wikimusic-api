@@ -35,7 +35,7 @@ fetchArtistsRoute env authToken limit offset sort' include =
     env
     authToken
     ( \authUser ->
-        liftIO (exec @(ArtistQuery :+: ArtistCommand) $ fetchArtistsAction env authUser (maybe (Limit 10) Limit limit) (maybe (Offset 0) Offset offset) sort' include) >>= maybe200
+        liftIO (exec @(ArtistQuery :+: ArtistCommand) $ fetchArtistsAction env authUser (maybe (Limit 25) Limit limit) (maybe (Offset 0) Offset offset) sort' include) >>= maybe200
     )
 
 searchArtistsRoute :: Env -> Maybe Text -> Text -> Maybe Int -> Maybe Int -> Maybe Text -> Maybe Text -> Handler GetArtistsQueryResponse
@@ -44,7 +44,7 @@ searchArtistsRoute env authToken searchInput limit offset sort' include =
     env
     authToken
     ( \authUser ->
-        liftIO (exec @(ArtistQuery :+: ArtistCommand) $ searchArtistsAction env authUser (maybe (Limit 10) Limit limit) (maybe (Offset 0) Offset offset) sort' include searchInput) >>= maybe200
+        liftIO (exec @(ArtistQuery :+: ArtistCommand) $ searchArtistsAction env authUser (maybe (Limit 25) Limit limit) (maybe (Offset 0) Offset offset) sort' include searchInput) >>= maybe200
     )
 
 fetchArtistRoute :: Env -> Maybe Text -> UUID -> Handler GetArtistsQueryResponse

@@ -21,7 +21,10 @@ import Database.SQLite.Simple qualified as Sqlite
 import Network.Wai
 import Network.Wai.Logger (ApacheLogger)
 import Network.Wai.Middleware.Cors
+import Network.Wai.Middleware.Prometheus qualified as P
 import Network.Wai.Middleware.RequestLogger
+import Prometheus qualified as P
+import Prometheus.Metric.GHC qualified as P
 import Relude
 import Servant
 import Servant.OpenApi
@@ -35,9 +38,6 @@ import WikiMusic.Servant.GenreRoutes
 import WikiMusic.Servant.SongRoutes
 import WikiMusic.Servant.UserRoutes
 import WikiMusic.Servant.Utilities
-import qualified Prometheus.Metric.GHC as P
-import qualified Prometheus as P
-import qualified Network.Wai.Middleware.Prometheus as P
 
 swagger :: Servant.Handler Data.OpenApi.OpenApi
 swagger = pure $ toOpenApi docsProxy

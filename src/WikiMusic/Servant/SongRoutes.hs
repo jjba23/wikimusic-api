@@ -43,7 +43,7 @@ fetchSongsRoute env authToken limit offset sort' include =
     env
     authToken
     ( \authUser ->
-        liftIO (exec @(SongQuery :+: SongCommand) $ fetchSongsAction env authUser (maybe (Limit 10) Limit limit) (maybe (Offset 0) Offset offset) sort' include) >>= maybe200
+        liftIO (exec @(SongQuery :+: SongCommand) $ fetchSongsAction env authUser (maybe (Limit 25) Limit limit) (maybe (Offset 0) Offset offset) sort' include) >>= maybe200
     )
 
 searchSongsRoute :: Env -> Maybe Text -> Text -> Maybe Int -> Maybe Int -> Maybe Text -> Maybe Text -> Handler GetSongsQueryResponse
@@ -52,7 +52,7 @@ searchSongsRoute env authToken searchInput limit offset sort' include =
     env
     authToken
     ( \authUser ->
-        liftIO (exec @(SongQuery :+: SongCommand) $ searchSongsAction env authUser (maybe (Limit 10) Limit limit) (maybe (Offset 0) Offset offset) sort' include searchInput) >>= maybe200
+        liftIO (exec @(SongQuery :+: SongCommand) $ searchSongsAction env authUser (maybe (Limit 25) Limit limit) (maybe (Offset 0) Offset offset) sort' include searchInput) >>= maybe200
     )
 
 fetchSongRoute :: Env -> Maybe Text -> UUID -> Handler GetSongsQueryResponse

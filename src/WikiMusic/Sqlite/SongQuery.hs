@@ -62,17 +62,18 @@ fetchSongs' env sortOrder (Limit limit) (Offset offset) = do
       $ runBeamSqliteDebug putStrLn (env ^. #conn)
       $ runSelectReturningList
       . select
-      . offset_ (fromIntegral offset)
-      . limit_ (fromIntegral limit)
+      . limit_ (toInteger limit)
+      . offset_ (toInteger offset)
       . mkOrderBy sortOrder
       $ all_ ((^. #songs) wikiMusicDatabase)
+
   filledSongs env songs
 
 fetchSongsByUUID' :: (MonadIO m) => Env -> SongSortOrder -> [UUID] -> m (Map UUID Song, [UUID])
 fetchSongsByUUID' env sortOrder identifiers = do
   songs <-
     liftIO
-      . runBeamSqliteDebug putStrLn (env ^. #conn)
+      . runBeamSqlite (env ^. #conn)
       . runSelectReturningList
       . select
       . filter_ (\s -> (s ^. #identifier) `in_` map (val_ . UUID.toText) identifiers)
@@ -84,7 +85,7 @@ fetchSongsByUUID' env sortOrder identifiers = do
 fetchSongArtworks' :: (MonadIO m) => Env -> [UUID] -> m (Map UUID SongArtwork)
 fetchSongArtworks' env identifiers = do
   artworks <- liftIO
-    . runBeamSqliteDebug putStrLn (env ^. #conn)
+    . runBeamSqlite (env ^. #conn)
     . runSelectReturningList
     . select
     . orderBy_ (asc_ . (^. #orderValue))
@@ -98,7 +99,7 @@ fetchSongArtworks' env identifiers = do
 -- | Fetch song comments from storage
 fetchSongComments' :: (MonadIO m) => Env -> [UUID] -> m (Map UUID SongComment)
 fetchSongComments' env identifiers = do
-  comments <- liftIO $ runBeamSqliteDebug putStrLn (env ^. #conn) $ runSelectReturningList $ select $ do
+  comments <- liftIO $ runBeamSqlite (env ^. #conn) $ runSelectReturningList $ select $ do
     songs <-
       filter_ (\s -> (s ^. #identifier) `in_` map (val_ . UUID.toText) identifiers)
         $ all_ ((^. #songs) wikiMusicDatabase)
@@ -109,7 +110,7 @@ fetchSongComments' env identifiers = do
 -- | Fetch song opinions from storage
 fetchSongOpinions' :: (MonadIO m) => Env -> [UUID] -> m (Map UUID SongOpinion)
 fetchSongOpinions' env identifiers = do
-  opinions <- liftIO $ runBeamSqliteDebug putStrLn (env ^. #conn) $ runSelectReturningList $ select $ do
+  opinions <- liftIO $ runBeamSqlite (env ^. #conn) $ runSelectReturningList $ select $ do
     songs <-
       filter_ (\s -> (s ^. #identifier) `in_` map (val_ . UUID.toText) identifiers)
         $ all_ ((^. #songs) wikiMusicDatabase)
@@ -172,12 +173,13 @@ fetchSongArtists' :: (MonadIO m) => Env -> [UUID] -> m [(UUID, UUID, Text)]
 fetchSongArtists' env identifiers = do
   songArtists <-
     liftIO
-      . runBeamSqliteDebug putStrLn (env ^. #conn)
+      . runBeamSqlite (env ^. #conn)
       . runSelectReturningList
       . select
       . orderBy_ (asc_ . (^. #createdAt))
       $ filter_ (\s -> (s ^. #songIdentifier) `in_` map (val_ . SongId . UUID.toText) identifiers)
       $ all_ ((^. #songArtists) wikiMusicDatabase)
+
   artists <-
     liftIO
       . runBeamSqliteDebug putStrLn (env ^. #conn)
@@ -205,10 +207,11 @@ searchSongs' env searchInput sortOrder (Limit limit) (Offset offset) = do
       . runSelectReturningList
       . select
       . filter_ (\s -> (s ^. #displayName) `like_` val_ ("%" <> searchInput ^. #value <> "%"))
-      . offset_ (fromIntegral offset)
       . limit_ (fromIntegral limit)
+      . offset_ (fromIntegral offset)
       . mkOrderBy sortOrder
       $ all_ ((^. #songs) wikiMusicDatabase)
+
   filledSongs env songs
 
 fetchSongContents' :: (MonadIO m) => Env -> [UUID] -> m (Map UUID SongContent)
