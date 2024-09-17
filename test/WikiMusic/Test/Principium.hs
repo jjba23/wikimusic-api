@@ -27,7 +27,8 @@ data CreatedTestUser = CreatedTestUser
   { identifier :: UUID,
     displayName :: Text,
     emailAddress :: Text,
-    password :: Text
+    password :: Text,
+    authToken :: Text
   }
   deriving (Generic, Eq, Show)
 
@@ -45,7 +46,16 @@ httpCall url = do
   _ <- print res
   pure res
 
-testWikiMusic :: (MonadIO m) => (AppConfig -> m a) -> m (Either Text a)
+httpCallWithToken :: (MonadIO m) => Text -> Text -> m (Response BL.ByteString)
+httpCallWithToken token url = do
+  let settings = managerSetProxy (proxyEnvironment Nothing) defaultManagerSettings
+  man <- liftIO $ newManager settings
+  let req = (fromString . T.unpack $ url) {proxy = Nothing, requestHeaders = [("x-wikimusic-auth", fromString . T.unpack $ token)]}
+  res <- liftIO $ httpLbs req man
+  _ <- print res
+  pure res
+
+testWikiMusic :: (MonadIO m) => (AppConfig -> m a) -> m a
 testWikiMusic eff = do
   portNumber <- liftIO $ randomRIO (2000, 65000)
   someUUID <- liftIO nextRandom
@@ -59,7 +69,7 @@ testWikiMusic eff = do
   result <- eff cfg
   _ <- liftIO $ killThread processThread
   _ <- liftIO . removeFile . fromString . T.unpack $ dbPath
-  pure . Right $ result
+  pure result
 
 mkConfig :: Int -> Text -> AppConfig
 mkConfig portNumber dbPath =
@@ -111,26 +121,29 @@ createUserInDB dbPath = do
   now <- liftIO getCurrentTime
   let mail = someText <> "@gmail.com"
       password = T.pack . reverse . T.unpack $ someText
+      authToken = password <> "-" <> password
   hashed <- hashPassword (mkPassword password)
   let q =
         [trimming|
                  INSERT INTO users (identifier, display_name, email_address,
-                 password_hash, created_at) VALUES (?,?,?,?,?)
+                 password_hash, auth_token, created_at) VALUES (?,?,?,?,?,?)
                  |]
 
   _ <- liftIO . doInDB dbPath $ \conn ->
     execute
       conn
       (fromString . T.unpack $ q)
-      (T.pack . show $ someUUID, someText, mail, unPasswordHash hashed, now)
-
-  pure
-    $ CreatedTestUser
-      { identifier = someUUID,
-        displayName = someText,
-        emailAddress = mail,
-        password = password
-      }
+      (T.pack . show $ someUUID, someText, mail, unPasswordHash hashed, authToken, now)
+  let createdTestUser =
+        CreatedTestUser
+          { identifier = someUUID,
+            displayName = someText,
+            emailAddress = mail,
+            password = password,
+            authToken = authToken
+          }
+  _ <- print createdTestUser
+  pure createdTestUser
 
 doInDB :: (MonadIO m) => Text -> (Connection -> m a) -> m ()
 doInDB dbPath eff = do
