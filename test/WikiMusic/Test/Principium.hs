@@ -1,10 +1,13 @@
 {-# LANGUAGE OverloadedLabels #-}
 {-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 module WikiMusic.Test.Principium where
 
 import Control.Concurrent
 import Data.ByteString.Lazy qualified as BL
+import Data.Password.Bcrypt
 import Data.Text qualified as T
 import Data.Time
 import Data.UUID (UUID)
@@ -15,9 +18,20 @@ import Network.HTTP.Client
 import Network.Wai.Logger (withStdoutLogger)
 import Optics
 import Relude
+import System.Directory
 import System.Random
 import WikiMusic.Boot qualified
 import WikiMusic.Model.Config
+
+data CreatedTestUser = CreatedTestUser
+  { identifier :: UUID,
+    displayName :: Text,
+    emailAddress :: Text,
+    password :: Text
+  }
+  deriving (Generic, Eq, Show)
+
+makeFieldLabelsNoPrefix ''CreatedTestUser
 
 mkTestUrl :: AppConfig -> Text
 mkTestUrl cfg = "http://" <> cfg ^. #servant % #host <> ":" <> (T.pack . show $ cfg ^. #servant % #port)
@@ -31,20 +45,21 @@ httpCall url = do
   _ <- print res
   pure res
 
-runWikiMusic :: (MonadIO m) => (AppConfig -> m a) -> m (Either Text a)
-runWikiMusic eff = do
+testWikiMusic :: (MonadIO m) => (AppConfig -> m a) -> m (Either Text a)
+testWikiMusic eff = do
   portNumber <- liftIO $ randomRIO (2000, 65000)
   someUUID <- liftIO nextRandom
-  let dbPath = "resources/test/wikimusic-" <> (T.pack . show $ someUUID) <> ".sqlite"
-  let cfg = mkConfig portNumber dbPath
 
-  let startWikiMusic = withStdoutLogger $ \logger' ->
+  let dbPath = "resources/test/wikimusic-" <> (T.pack . show $ someUUID) <> ".sqlite"
+      cfg = mkConfig portNumber dbPath
+      startWikiMusic = withStdoutLogger $ \logger' ->
         WikiMusic.Boot.startWikiMusicAPI logger' cfg
 
-  bootThread <- liftIO $ forkIO startWikiMusic
-  res <- eff cfg
-  _ <- liftIO $ killThread bootThread
-  pure . Right $ res
+  processThread <- liftIO $ forkIO startWikiMusic
+  result <- eff cfg
+  _ <- liftIO $ killThread processThread
+  _ <- liftIO . removeFile . fromString . T.unpack $ dbPath
+  pure . Right $ result
 
 mkConfig :: Int -> Text -> AppConfig
 mkConfig portNumber dbPath =
@@ -87,24 +102,38 @@ mkConfig portNumber dbPath =
     }
 
 randomText :: (MonadIO m) => m Text
-randomText = T.pack . take 10 . randomRs ('a', 'z') <$> newStdGen
+randomText = T.pack . take 16 . randomRs ('a', 'z') <$> newStdGen
 
-createUserInDb :: (MonadIO m) => Text -> m ()
-createUserInDb dbPath = do
-  conn <- liftIO $ open (T.unpack dbPath)
+createUserInDB :: (MonadIO m) => Text -> m CreatedTestUser
+createUserInDB dbPath = do
+  someUUID <- liftIO nextRandom
+  someText <- randomText
+  now <- liftIO getCurrentTime
+  let mail = someText <> "@gmail.com"
+      password = T.pack . reverse . T.unpack $ someText
+  hashed <- hashPassword (mkPassword password)
   let q =
         [trimming|
-    INSERT INTO users (identifier, display_name, email_address,
-    password_hash, created_at) VALUES (?,?,?,?,?)
-  |]
-  someUUID <- liftIO nextRandom
-  rt <- randomText
-  now <- liftIO getCurrentTime
-  let mail = rt <> "@" <> rt <> ".com"
-  _ <-
-    liftIO
-      $ execute
-        conn
-        (fromString . T.unpack $ q)
-        (T.pack . show $ someUUID, rt, mail, rt, now)
+                 INSERT INTO users (identifier, display_name, email_address,
+                 password_hash, created_at) VALUES (?,?,?,?,?)
+                 |]
+
+  _ <- liftIO . doInDB dbPath $ \conn ->
+    execute
+      conn
+      (fromString . T.unpack $ q)
+      (T.pack . show $ someUUID, someText, mail, unPasswordHash hashed, now)
+
+  pure
+    $ CreatedTestUser
+      { identifier = someUUID,
+        displayName = someText,
+        emailAddress = mail,
+        password = password
+      }
+
+doInDB :: (MonadIO m) => Text -> (Connection -> m a) -> m ()
+doInDB dbPath eff = do
+  conn <- liftIO $ open (T.unpack dbPath)
+  _ <- eff conn
   liftIO $ close conn

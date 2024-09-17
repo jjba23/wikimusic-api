@@ -278,10 +278,15 @@ CREATE TABLE user_roles (
   
 CREATE TABLE users (
   identifier TEXT NOT NULL PRIMARY KEY, 
-  display_name TEXT NOT NULL, email_address TEXT NOT NULL, 
-  password_hash TEXT NOT NULL, password_reset_token TEXT, 
-  latest_login_at TEXT, latest_login_device TEXT, 
-  avatar_url TEXT, created_at TEXT NOT NULL, 
-  last_edited_at TEXT, auth_token TEXT, 
+  display_name TEXT NOT NULL,
+  email_address TEXT NOT NULL, 
+  password_hash TEXT NOT NULL,
+  password_reset_token TEXT, 
+  latest_login_at TEXT,
+  latest_login_device TEXT, 
+  avatar_url TEXT,
+  created_at TEXT NOT NULL, 
+  last_edited_at TEXT,
+  auth_token TEXT, 
   description TEXT
 );
