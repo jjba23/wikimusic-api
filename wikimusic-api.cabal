@@ -163,7 +163,6 @@ library
     , word8
     , beam-core
     , beam-sqlite
-    , beam-migrate
     , sqlite-simple
   default-language: GHC2021
 
@@ -248,11 +247,17 @@ test-suite spec
     , text
     , http-client
     , http-types
+    , containers
     , optics
+    , beam-core
+    , beam-sqlite
     , sqlite-simple
     , neat-interpolation
     , time
     , password
     , password-types
     , directory
+    , keuringsdienst
+    , wikimusic-model-hs
+    , wikimusic-api-spec
   default-language: GHC2021

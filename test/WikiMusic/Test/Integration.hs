@@ -1,32 +1,27 @@
 {-# LANGUAGE OverloadedLabels #-}
+{-# LANGUAGE QuasiQuotes #-}
 
 module WikiMusic.Test.Integration where
 
-import Control.Concurrent
-import Network.HTTP.Client
-import Network.HTTP.Types.Status (statusCode)
-import Optics
-import Relude
-import Test.Hspec
 import WikiMusic.Test.Principium
 
 integrationSpec :: SpecWith ()
 integrationSpec =
   describe "starts WikiMusic application properly" $ do
     it "starts and shuts down the application properly" $ do
-      result <- testWikiMusic (const . liftIO $ threadDelay 1000000)
+      result <- testWikiMusic (const . liftIO $ sleepSeconds 1)
       result `shouldBe` ()
     it "checks that the system information route is reachable" $ do
-      httpResponse <- testWikiMusic (\cfg -> httpCall (mkTestUrl cfg <> "/system-information"))
-      (statusCode . responseStatus $ httpResponse) `shouldBe` 200
+      httpResponse <- testWikiMusic (\cfg -> httpCall Nothing (mkTestUrl cfg <> "/system-information"))
+      expectStatus 200 httpResponse
     it "checks that invalid UUIDs always return a 400" $ do
       let invalidUUIDPaths =
             [ "/songs/identifier/abc",
               "/artists/identifier/abc",
               "/genres/identifier/abc"
             ]
-      httpResponses <- testWikiMusic (\cfg -> mapM (\path -> httpCall (mkTestUrl cfg <> path)) invalidUUIDPaths)
-      all ((== 400) . statusCode . responseStatus) httpResponses `shouldBe` True
+      httpResponses <- testWikiMusic (\cfg -> mapM (\path -> httpCall Nothing (mkTestUrl cfg <> path)) invalidUUIDPaths)
+      expectAllStatus 400 httpResponses
     it "checks that protected routes are returning 401 when not logged in" $ do
       let protectedPaths =
             [ "/songs",
@@ -36,14 +31,32 @@ integrationSpec =
               "/genres",
               "/genres/identifier/c19e4f56-7c06-437d-b8f7-59d13dd53c9a"
             ]
-      httpResponses <- testWikiMusic (\cfg -> mapM (\path -> httpCall (mkTestUrl cfg <> path)) protectedPaths)
-      all ((== 401) . statusCode . responseStatus) httpResponses `shouldBe` True
-    it "receives empty responses when a demo user exists but no data exists in DB" $ do
+      httpResponses <- testWikiMusic (\cfg -> mapM (\path -> httpCall Nothing (mkTestUrl cfg <> path)) protectedPaths)
+      expectAllStatus 401 httpResponses
+    it "receives empty songs list when a user (demo) exists but no data exists in DB" $ do
       httpResponse <-
         testWikiMusic
           ( \cfg -> do
-              u <- createUserInDB (cfg ^. #sqlite % #path)
-              _ <- createDemoRolesInDB (cfg ^. #sqlite % #path) [u ^. #identifier]
-              httpCallWithToken (u ^. #authToken) (mkTestUrl cfg <> "/songs")
+              u <- createUserInDB (cfg ^. #sqlite % #path) "wm::demo"
+              httpCall (u ^. #authToken) (mkTestUrl cfg <> "/songs")
           )
-      (statusCode . responseStatus $ httpResponse) `shouldBe` 200
+      expectStatus 200 httpResponse
+      expectResponseBody [trimming|{"songs":{},"sortOrder":[]}|] httpResponse
+    it "receives empty genres list when a user (demo) exists but no data exists in DB" $ do
+      httpResponse <-
+        testWikiMusic
+          ( \cfg -> do
+              u <- createUserInDB (cfg ^. #sqlite % #path) "wm::demo"
+              httpCall (u ^. #authToken) (mkTestUrl cfg <> "/genres")
+          )
+      expectStatus 200 httpResponse
+      expectResponseBody [trimming|{"genres":{},"sortOrder":[]}|] httpResponse
+    it "receives empty artists list when a user (demo) exists but no data exists in DB" $ do
+      httpResponse <-
+        testWikiMusic
+          ( \cfg -> do
+              u <- createUserInDB (cfg ^. #sqlite % #path) "wm::demo"
+              httpCall (u ^. #authToken) (mkTestUrl cfg <> "/artists")
+          )
+      expectStatus 200 httpResponse
+      expectResponseBody [trimming|{"artists":{},"sortOrder":[]}|] httpResponse
