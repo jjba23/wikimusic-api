@@ -239,4 +239,9 @@ test-suite spec
     , tasty
     , tasty-hspec
     , relude
+    , wai
+    , wai-logger
+    , random
+    , uuid
+    , text 
   default-language: GHC2021

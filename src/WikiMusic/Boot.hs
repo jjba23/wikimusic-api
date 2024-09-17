@@ -2,10 +2,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE NoFieldSelectors #-}
 
-module WikiMusic.Boot
-  ( boot,
-  )
-where
+module WikiMusic.Boot where
 
 import Control.Monad
 import Data.ByteString.Lazy qualified as BL
