@@ -1,7 +1,7 @@
 import Relude
 import Test.Hspec
-import WikiMusic.Test.Head
+import WikiMusic.Test.Integration
 
 main :: IO ()
 main = hspec $ do
-  headSpec
+  integrationSpec

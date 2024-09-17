@@ -205,7 +205,8 @@ test-suite spec
   main-is: Spec.hs
   other-modules:
       Paths_wikimusic_api
-      WikiMusic.Test.Head
+      WikiMusic.Test.Integration
+      WikiMusic.Test.Principium
   hs-source-dirs:
       test
   ghc-options: -Wall -threaded -rtsopts "-with-rtsopts=-T -N"
@@ -243,5 +244,8 @@ test-suite spec
     , wai-logger
     , random
     , uuid
-    , text 
+    , text
+    , http-client
+    , http-types
+    , optics
   default-language: GHC2021
