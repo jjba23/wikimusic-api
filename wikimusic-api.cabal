@@ -1,7 +1,7 @@
 cabal-version: 1.12
 
 name:           wikimusic-api
-version:        1.2.0.4
+version:        1.2.0.6
 description:    Please see the README at <https://gitlab.com/jjba-projects/wikimusic-api>
 homepage:       https://gitlab.com/jjba-projects/wikimusic-api
 bug-reports:    https://gitlab.com/jjba-projects/wikimusic-api/-/issues
@@ -77,6 +77,7 @@ library
       WikiMusic.Sqlite.SongQuery
       WikiMusic.Sqlite.UserQuery
       WikiMusic.Sqlite.UserCommand
+      WikiMusic.Sqlite.Yggdrasil
       
       
       -- λ clock
@@ -162,7 +163,6 @@ library
     , word8
     , beam-core
     , beam-sqlite
-    , beam-migrate
     , sqlite-simple
   default-language: GHC2021
 
@@ -205,6 +205,8 @@ test-suite spec
   main-is: Spec.hs
   other-modules:
       Paths_wikimusic_api
+      WikiMusic.Test.Integration
+      WikiMusic.Test.Principium
   hs-source-dirs:
       test
   ghc-options: -Wall -threaded -rtsopts "-with-rtsopts=-T -N"
@@ -233,6 +235,29 @@ test-suite spec
   build-depends:
     wikimusic-api
     , base
+    , hspec
+    , QuickCheck
     , tasty
-    , tasty-hunit
+    , tasty-hspec
+    , relude
+    , wai
+    , wai-logger
+    , random
+    , uuid
+    , text
+    , http-client
+    , http-types
+    , containers
+    , optics
+    , beam-core
+    , beam-sqlite
+    , sqlite-simple
+    , neat-interpolation
+    , time
+    , password
+    , password-types
+    , directory
+    , keuringsdienst
+    , wikimusic-model-hs
+    , wikimusic-api-spec
   default-language: GHC2021

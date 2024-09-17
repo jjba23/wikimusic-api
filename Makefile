@@ -11,7 +11,7 @@ dev: fmt
 # 	nix run -L .#
 run-production:
 	nix run -L . -- "./resources/config/run-production.toml"
-test:
+test: fmt
 	nix run -L .#test
 push-cache:
 	nix path-info --recursive | cachix push wikimusic-api

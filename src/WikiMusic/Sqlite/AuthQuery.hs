@@ -64,7 +64,7 @@ fetchUserFromToken' env t = do
 fetchUserRoles' :: (MonadIO m) => Env -> UUID -> m (Either AuthQueryError [UserRole])
 fetchUserRoles' env identifier = do
   userRoles <- liftIO . runBeamSqliteDebug putStrLn (env ^. #conn) . runSelectReturningList . select $ do
-    filter_ (\s -> (s ^. #userIdentifier) ==. (val_ . UserId $ UUID.toText $ identifier))
+    filter_ (\s -> (s ^. #userIdentifier) ==. (val_ . UserId $ UUID.toText identifier))
       $ all_ ((^. #userRoles) wikiMusicDatabase)
 
   let roles' = map (userRole . (^. #roleId)) userRoles
