@@ -18,8 +18,8 @@ integrationSpec =
       result <- testWikiMusic (const . liftIO $ threadDelay 1000000)
       result `shouldBe` ()
     it "checks that the system information route is reachable" $ do
-      res <- testWikiMusic (\cfg -> httpCall (mkTestUrl cfg <> "/system-information"))
-      (statusCode . responseStatus $ res) `shouldBe` 200
+      httpResponse <- testWikiMusic (\cfg -> httpCall (mkTestUrl cfg <> "/system-information"))
+      (statusCode . responseStatus $ httpResponse) `shouldBe` 200
     it "checks that invalid UUIDs always return a 400" $ do
       let invalidUUIDPaths =
             [ "/songs/identifier/abc",
@@ -40,10 +40,11 @@ integrationSpec =
       httpResponses <- testWikiMusic (\cfg -> mapM (\path -> httpCall (mkTestUrl cfg <> path)) protectedPaths)
       all ((== 401) . statusCode . responseStatus) httpResponses `shouldBe` True
     it "receives empty responses when a user exist but no data exists in DB" $ do
-      createdTestUser <-
+      httpResponse <-
         testWikiMusic
           ( \cfg -> do
-              _ <- runYggdrasil "resources/migrations/sqlite"
-              createUserInDB (cfg ^. #sqlite % #path)
+              _ <- runYggdrasil (cfg ^. #sqlite % #path) "resources/migrations/sqlite/"
+              u <- createUserInDB (cfg ^. #sqlite % #path)
+              httpCallWithToken (u ^. #authToken) (mkTestUrl cfg <> "/songs")
           )
-      True `shouldBe` True
+      (statusCode . responseStatus $ httpResponse) `shouldBe` 200

@@ -1,7 +1,7 @@
 cabal-version: 1.12
 
 name:           wikimusic-api
-version:        1.2.0.4
+version:        1.2.0.6
 description:    Please see the README at <https://gitlab.com/jjba-projects/wikimusic-api>
 homepage:       https://gitlab.com/jjba-projects/wikimusic-api
 bug-reports:    https://gitlab.com/jjba-projects/wikimusic-api/-/issues
