@@ -22,6 +22,7 @@ import System.Directory
 import System.Random
 import WikiMusic.Boot qualified
 import WikiMusic.Model.Config
+import WikiMusic.Sqlite.Yggdrasil
 
 data CreatedTestUser = CreatedTestUser
   { identifier :: UUID,
@@ -66,6 +67,7 @@ testWikiMusic eff = do
         WikiMusic.Boot.startWikiMusicAPI logger' cfg
 
   processThread <- liftIO $ forkIO startWikiMusic
+  _ <- liftIO $ runYggdrasil defaultYggdrasil {databaseFilePath = dbPath}
   result <- eff cfg
   _ <- liftIO $ killThread processThread
   _ <- liftIO . removeFile . fromString . T.unpack $ dbPath
@@ -144,6 +146,31 @@ createUserInDB dbPath = do
           }
   _ <- print createdTestUser
   pure createdTestUser
+
+createDemoRolesInDB :: (MonadIO m) => Text -> [UUID] -> m ()
+createDemoRolesInDB dbPath xs = createRolesInDB dbPath (map (,"wm::demo") xs)
+
+createRolesInDB :: (MonadIO m) => Text -> [(UUID, Text)] -> m ()
+createRolesInDB dbPath xs = do
+  now <- liftIO getCurrentTime
+  let q =
+        [trimming|
+                 INSERT INTO user_roles (identifier, user_identifier, role_id,
+                 created_at) VALUES (?,?,?,?)
+                 |]
+  someUUID <- liftIO nextRandom
+  _ <-
+    liftIO
+      $ mapM
+        ( \(userId, roleId) -> doInDB dbPath $ \conn ->
+            execute
+              conn
+              (fromString . T.unpack $ q)
+              (T.pack . show $ someUUID, T.pack . show $ userId, roleId, now)
+        )
+        xs
+
+  pure ()
 
 doInDB :: (MonadIO m) => Text -> (Connection -> m a) -> m ()
 doInDB dbPath eff = do

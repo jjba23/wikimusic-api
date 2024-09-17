@@ -8,7 +8,6 @@ import Network.HTTP.Types.Status (statusCode)
 import Optics
 import Relude
 import Test.Hspec
-import WikiMusic.Sqlite.Yggdrasil
 import WikiMusic.Test.Principium
 
 integrationSpec :: SpecWith ()
@@ -39,12 +38,12 @@ integrationSpec =
             ]
       httpResponses <- testWikiMusic (\cfg -> mapM (\path -> httpCall (mkTestUrl cfg <> path)) protectedPaths)
       all ((== 401) . statusCode . responseStatus) httpResponses `shouldBe` True
-    it "receives empty responses when a user exist but no data exists in DB" $ do
+    it "receives empty responses when a demo user exists but no data exists in DB" $ do
       httpResponse <-
         testWikiMusic
           ( \cfg -> do
-              _ <- runYggdrasil (cfg ^. #sqlite % #path) "resources/migrations/sqlite/"
               u <- createUserInDB (cfg ^. #sqlite % #path)
+              _ <- createDemoRolesInDB (cfg ^. #sqlite % #path) [u ^. #identifier]
               httpCallWithToken (u ^. #authToken) (mkTestUrl cfg <> "/songs")
           )
       (statusCode . responseStatus $ httpResponse) `shouldBe` 200
