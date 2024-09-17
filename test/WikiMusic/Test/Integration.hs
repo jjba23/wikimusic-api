@@ -1,8 +1,11 @@
+{-# LANGUAGE OverloadedLabels #-}
+
 module WikiMusic.Test.Integration where
 
 import Control.Concurrent
 import Network.HTTP.Client
 import Network.HTTP.Types.Status (statusCode)
+import Optics
 import Relude
 import Test.Hspec
 import WikiMusic.Test.Principium
@@ -35,3 +38,6 @@ integrationSpec =
             ]
       httpResponses <- runWikiMusic (\cfg -> mapM (\path -> httpCall (mkTestUrl cfg <> path)) protectedPaths)
       second (all ((== 401) . statusCode . responseStatus)) httpResponses `shouldBe` Right True
+    it "receives empty responses when a user exist but no data exists in DB" $ do
+      _ <- runWikiMusic (\cfg -> createUserInDb (cfg ^. #sqlite % #path))
+      True `shouldBe` True

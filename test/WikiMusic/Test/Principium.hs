@@ -1,11 +1,16 @@
 {-# LANGUAGE OverloadedLabels #-}
+{-# LANGUAGE QuasiQuotes #-}
 
 module WikiMusic.Test.Principium where
 
 import Control.Concurrent
 import Data.ByteString.Lazy qualified as BL
 import Data.Text qualified as T
+import Data.Time
+import Data.UUID (UUID)
 import Data.UUID.V4
+import Database.SQLite.Simple
+import NeatInterpolation
 import Network.HTTP.Client
 import Network.Wai.Logger (withStdoutLogger)
 import Optics
@@ -80,3 +85,26 @@ mkConfig portNumber dbPath =
           { reportedVersion = ""
           }
     }
+
+randomText :: (MonadIO m) => m Text
+randomText = T.pack . take 10 . randomRs ('a', 'z') <$> newStdGen
+
+createUserInDb :: (MonadIO m) => Text -> m ()
+createUserInDb dbPath = do
+  conn <- liftIO $ open (T.unpack dbPath)
+  let q =
+        [trimming|
+    INSERT INTO users (identifier, display_name, email_address,
+    password_hash, created_at) VALUES (?,?,?,?,?)
+  |]
+  someUUID <- liftIO nextRandom
+  rt <- randomText
+  now <- liftIO getCurrentTime
+  let mail = rt <> "@" <> rt <> ".com"
+  _ <-
+    liftIO
+      $ execute
+        conn
+        (fromString . T.unpack $ q)
+        (T.pack . show $ someUUID, rt, mail, rt, now)
+  liftIO $ close conn

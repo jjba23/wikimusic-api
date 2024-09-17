@@ -248,4 +248,7 @@ test-suite spec
     , http-client
     , http-types
     , optics
+    , sqlite-simple
+    , neat-interpolation
+    , time
   default-language: GHC2021
