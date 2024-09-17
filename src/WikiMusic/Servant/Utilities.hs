@@ -116,16 +116,28 @@ err204 =
     }
 
 maybe204 :: (Show s) => Either s b -> Handler b
-maybe204 (Left err) = throwError $ err500 {errBody = fromString . WikiMusic.Protolude.show $ err}
+maybe204 (Left err) =
+  throwError
+    $ err500
+      { errBody = fromString . WikiMusic.Protolude.show $ err
+      }
 maybe204 _ = throwError err204
 
 maybe200 :: (Show s) => Either s b -> Handler b
-maybe200 (Left err) = throwError $ err500 {errBody = fromString . WikiMusic.Protolude.show $ err}
+maybe200 (Left err) =
+  throwError
+    $ err500
+      { errBody = fromString . WikiMusic.Protolude.show $ err
+      }
 maybe200 (Right x) = pure x
 
 doWithAuth :: Env -> Maybe Text -> (WikiMusicUser -> Handler a) -> Handler a
 doWithAuth env authToken eff = do
-  authUser <- liftIO $ authCheckIO env (fromMaybe "" authToken)
-  case authUser of
+  case authToken of
     Nothing -> throwError err401
-    Just auth -> eff auth
+    Just "" -> throwError err401
+    Just t -> do
+      authUser <- liftIO $ authCheckIO env t
+      case authUser of
+        Nothing -> throwError err401
+        Just auth -> eff auth
