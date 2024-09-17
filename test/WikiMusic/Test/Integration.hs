@@ -5,7 +5,6 @@ import Network.HTTP.Client
 import Network.HTTP.Types.Status (statusCode)
 import Relude
 import Test.Hspec
-import WikiMusic.Model.Config
 import WikiMusic.Test.Principium
 
 integrationSpec :: SpecWith ()
@@ -18,34 +17,21 @@ integrationSpec =
       res <- runWikiMusic (\cfg -> httpCall (mkTestUrl cfg <> "/system-information"))
       second (statusCode . responseStatus) res `shouldBe` Right 200
     it "checks that invalid UUIDs always return a 400" $ do
-      statuses <-
-        runWikiMusic
-          ( \cfg ->
-              mapM
-                (getHttpStatusCode cfg)
-                [ "/songs/identifier/abc",
-                  "/artists/identifier/abc",
-                  "/genres/identifier/abc"
-                ]
-          )
-      second (all (== 400)) statuses `shouldBe` Right True
+      let invalidUUIDPaths =
+            [ "/songs/identifier/abc",
+              "/artists/identifier/abc",
+              "/genres/identifier/abc"
+            ]
+      httpResponses <- runWikiMusic (\cfg -> mapM (\path -> httpCall (mkTestUrl cfg <> path)) invalidUUIDPaths)
+      second (all ((== 400) . statusCode . responseStatus)) httpResponses `shouldBe` Right True
     it "checks that protected routes are returning 401 when not logged in" $ do
-      statuses <-
-        runWikiMusic
-          ( \cfg ->
-              mapM
-                (getHttpStatusCode cfg)
-                [ "/songs",
-                  "/songs/identifier/c19e4f56-7c06-437d-b8f7-59d13dd53c9a",
-                  "/artists",
-                  "/artists/identifier/c19e4f56-7c06-437d-b8f7-59d13dd53c9a",
-                  "/genres",
-                  "/genres/identifier/c19e4f56-7c06-437d-b8f7-59d13dd53c9a"
-                ]
-          )
-      second (all (== 401)) statuses `shouldBe` Right True
-
-getHttpStatusCode :: (MonadIO m) => AppConfig -> Text -> m Int
-getHttpStatusCode cfg path = do
-  res <- liftIO $ httpCall (mkTestUrl cfg <> path)
-  pure $ statusCode . responseStatus $ res
+      let protectedPaths =
+            [ "/songs",
+              "/songs/identifier/c19e4f56-7c06-437d-b8f7-59d13dd53c9a",
+              "/artists",
+              "/artists/identifier/c19e4f56-7c06-437d-b8f7-59d13dd53c9a",
+              "/genres",
+              "/genres/identifier/c19e4f56-7c06-437d-b8f7-59d13dd53c9a"
+            ]
+      httpResponses <- runWikiMusic (\cfg -> mapM (\path -> httpCall (mkTestUrl cfg <> path)) protectedPaths)
+      second (all ((== 401) . statusCode . responseStatus)) httpResponses `shouldBe` Right True
