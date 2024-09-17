@@ -83,7 +83,7 @@ import WikiMusic.Boot qualified
 import WikiMusic.Model.Auth hiding (show)
 import WikiMusic.Model.Config
 import WikiMusic.Model.Other
-import WikiMusic.Sqlite.Yggdrasil
+import Yggdrasil
 
 --
 

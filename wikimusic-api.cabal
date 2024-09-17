@@ -76,9 +76,7 @@ library
       WikiMusic.Sqlite.SongCommand
       WikiMusic.Sqlite.SongQuery
       WikiMusic.Sqlite.UserQuery
-      WikiMusic.Sqlite.UserCommand
-      WikiMusic.Sqlite.Yggdrasil
-      
+      WikiMusic.Sqlite.UserCommand      
       
       -- λ clock
       WikiMusic.Clock.LiveClock
@@ -164,6 +162,7 @@ library
     , beam-core
     , beam-sqlite
     , sqlite-simple
+    , yggdrasil
   default-language: GHC2021
 
 executable wikimusic-api-exe
@@ -197,10 +196,10 @@ executable wikimusic-api-exe
 
   build-depends:
     base
-    , wikimusic-api
+    , wikimusic-api    
   default-language: GHC2021
 
-test-suite spec
+test-suite wikimusic-api-spec
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
@@ -260,4 +259,5 @@ test-suite spec
     , keuringsdienst
     , wikimusic-model-hs
     , wikimusic-api-spec
+    , yggdrasil
   default-language: GHC2021

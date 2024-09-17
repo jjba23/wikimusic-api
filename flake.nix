@@ -25,10 +25,7 @@
               };
               shell.buildInputs = with pkgs; [
                 gnumake
-                simple-http-server
-                minify
                 haskell-language-server
-                watchexec
                 cachix
                 ormolu
                 nixfmt
@@ -49,7 +46,7 @@
       in flake // {
         legacyPackages = pkgs;
         packages.default = flake.packages."wikimusic-api:exe:wikimusic-api-exe";
-        packages.test = flake.packages."wikimusic-api:test:spec";
+        packages.test = flake.packages."wikimusic-api:test:wikimusic-api-spec";
       });
 
 }
