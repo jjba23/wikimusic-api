@@ -1,7 +1,7 @@
 cabal-version: 1.12
 
 name:           wikimusic-api
-version:        1.2.0.6
+version:        1.2.0.7
 description:    Please see the README at <https://gitlab.com/jjba-projects/wikimusic-api>
 homepage:       https://gitlab.com/jjba-projects/wikimusic-api
 bug-reports:    https://gitlab.com/jjba-projects/wikimusic-api/-/issues
@@ -17,7 +17,6 @@ extra-source-files:
 source-repository head
   type: git
   location: https://gitlab.com/jjba-projects/wikimusic-api
-  subdir: wikimusic-api
 
 library
   exposed-modules:
@@ -162,7 +161,7 @@ library
     , beam-core
     , beam-sqlite
     , sqlite-simple
-    , yggdrasil
+    , yggdrasil-schema
   default-language: GHC2021
 
 executable wikimusic-api-exe
@@ -259,5 +258,5 @@ test-suite wikimusic-api-spec
     , keuringsdienst
     , wikimusic-model-hs
     , wikimusic-api-spec
-    , yggdrasil
+    , yggdrasil-schema
   default-language: GHC2021
