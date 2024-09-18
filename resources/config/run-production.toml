@@ -3,7 +3,7 @@ port = 50050
 host = "127.0.0.1"
 
 [sqlite]
-path = "/root/wikimusic.sqlite"
+path = "/home/joe/wikimusic.sqlite"
 run-migrations = true
 
 [cors]
