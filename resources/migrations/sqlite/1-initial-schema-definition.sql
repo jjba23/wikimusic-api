@@ -280,7 +280,7 @@ CREATE TABLE users (
   identifier TEXT NOT NULL PRIMARY KEY, 
   display_name TEXT NOT NULL,
   email_address TEXT NOT NULL, 
-  password_hash TEXT NOT NULL,
+  password_hash TEXT,
   password_reset_token TEXT, 
   latest_login_at TEXT,
   latest_login_device TEXT, 
