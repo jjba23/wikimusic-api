@@ -118,7 +118,7 @@ newToken now new =
 addUser :: (MonadIO m) => Env -> UserEmail -> UserName -> UserRole -> Maybe Text -> m (Either UserCommandError Text)
 addUser env email name' role desc = do
   now <- liftIO getCurrentTime
-  identifier <- liftIO nextRandom
+  passResetToken <- liftIO nextRandom
   new <- liftIO nextRandom
   newNew <- liftIO nextRandom
   let u =
@@ -127,7 +127,7 @@ addUser env email name' role desc = do
             displayName = name' ^. #value,
             emailAddress = email ^. #value,
             passwordHash = Nothing,
-            passwordResetToken = Just $ UUID.toText identifier,
+            passwordResetToken = Just $ UUID.toText passResetToken,
             createdAt = now,
             authToken = Nothing,
             latestLoginAt = Nothing,
@@ -155,7 +155,7 @@ addUser env email name' role desc = do
     . runInsert
     . insert ((^. #userRoles) wikiMusicDatabase)
     $ insertValues [r]
-  pure . Right . UUID.toText $ new
+  pure . Right . UUID.toText $ passResetToken
 
 doIfUserFoundByEmail :: (MonadIO m) => Env -> UserEmail -> (UUID -> m (Either UserCommandError a)) -> m (Either UserCommandError a)
 doIfUserFoundByEmail env email eff = do
