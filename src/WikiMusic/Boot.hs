@@ -51,3 +51,4 @@ startWikiMusicAPI logger' cfg = do
   liftIO $ runSettings apiSettings =<< mkApp logger' cfg
   where
     apiSettings = setPort (cfg ^. #servant % #port) defaultSettings
+

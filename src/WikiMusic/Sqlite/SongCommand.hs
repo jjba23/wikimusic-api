@@ -280,10 +280,7 @@ updateSongContents' env songContentDeltas = do
               fmap (updatedSongContent songContentDelta now . head)
                 $ nonEmpty
                 $ filter
-                  ( \songContentP ->
-                      songContentP
-                        ^. #identifier
-                        == (UUID.toText $ songContentDelta ^. #identifier)
+                  ( \songContentP -> songContentP ^. #identifier == UUID.toText (songContentDelta ^. #identifier)
                   )
                   songContentsP
           )
