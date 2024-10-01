@@ -16,6 +16,6 @@ jobs:
                -H 'Authorization: Basic ${{secrets.BYGGSTEG_KEY}}' \
                --data-urlencode "project=wikimusic-api" \
                --data-urlencode "branch-name=${{ github.head_ref || github.ref_name }}" \
-               --data-urlencode "task=pull-and-restart" \
+               --data-urlencode "task=stack-test" \
                --data-urlencode "clone-url=https://github.com/jjba23/wikimusic-api"
 
