@@ -5,7 +5,7 @@ on:
       - trunk
 
 jobs:
-  byggsteg:
+  on-push-to-trunk-byggsteg:
     runs-on: ubuntu-latest
     steps:
       - name: "trigger re-deploy WikiMusic API"
